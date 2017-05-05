@@ -407,7 +407,7 @@ class WorkPlan(object):
 		self.jsonData = self.OVCall.jsonData
 
 
-class Tasks(object):
+class Task(object):
 
 	def __init__(self, URL = "", userName="", password=""):
 		self.URL = URL
@@ -513,7 +513,7 @@ class Import(object):
 				self.processId = self.jsonData["process_id"]
 				self.status = self.jsonData["status"]
 		self.request = self.OVCall.request
-		self.jsonData = self.jsonData
+		self.jsonData = self.OVCall.jsonData
 
 	def interrupt(self,ProcessID=None):
 		if ProcessID is None:
@@ -529,6 +529,173 @@ class Import(object):
 		self.OVCall = curl('POST',self.ImportURL)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
+		else:
+			self.processId = PID
+		self.request = self.OVCall.request
+		self.jsonData = self.OVCall.jsonData
+		if "status" in self.jsonData:
+			self.status = self.jsonData['status']
+
+	def getProcessStatus(self,ProcessID=None):
+		if ProcessID is None:
+			PID = self.processId
+		else:
+			PID = ProcessID
+		self.ImportURL = "https://%s:%s@%s/api/v3/imports/runs/%d"%(
+			self.username,
+			self.password,
+			self.website,
+			PID
+			)
+		self.OVCall = curl('GET',self.ImportURL)
+		if len(self.OVCall.errors) > 0:
+			self.errors.append(self.OVCall.errors)
+		else:
+			pass
+		self.request = self.OVCall.request
+		self.jsonData = self.OVCall.jsonData
+		if "status" in self.jsonData:
+			self.status = self.jsonData['status']
+		else:
+			self.status = 'No Status'
+		return self.status
+
+
+
+
+
+
+class Export(object):
+
+	def __init__(
+		self, 
+		website=None, 
+		username=None, 
+		password=None, 
+		trackorType=None,
+		filters={},
+		fields=[],
+		exportMode="CSV",
+		delivery="File",
+		viewOptions=None,
+		filterOptions=None,
+		fileFields=None,
+		comments=None
+		):
+		self.website = website
+		self.username = username
+		self.password = password
+		self.trackorType = trackorType
+		self.exportMode = exportMode
+		self.delivery = delivery
+		self.comments = comments
+		self.filters = filters
+		self.fields = fields
+		self.viewOptions = viewOptions
+		self.filterOptions = filterOptions
+		self.fileFields = fileFields
+		self.errors = []
+		self.request = {}
+		self.jsonData = {}
+		self.processId = processId
+		self.status = None
+		self.processList = []
+
+		# If all info is filled out, go ahead and run the query.
+		if website != None and username != None and password != None and impSpecId != None and file != None:
+			self.run()
+
+	def run(self):
+		self.ImportURL = "https://%s:%s@%s/api/v3/exports/%s/run?export_mode=%s&delivery=%s"%(
+			self.username,
+			self.password,
+			self.website,
+			self.trackorType,
+			self.exportMode,
+			self.delivery
+			)
+
+		ViewSection = ""
+		if viewOptions is None:
+			ViewSection = '&fields=' + ",".join(fields)
+		else:
+			ViewSection = '&view=' + URLEncode(viewOptions)
+		self.ImportURL += ViewSection
+
+		FilterSection = "&"
+		if filterOptions is None:
+			for key,value in filters.items():
+				FilterSection += key + '=' + URLEncode(str(value)) + '&'
+			FilterSection = FilterSection.rstrip('?&')
+		else:
+			FilterSection = "&filter="+URLEncode(filterOptions)
+		self.ImportURL += FilterSection
+
+		if self.comments is not None:
+			self.ImportURL += '&comments=' + URLEncode(self.comments)
+		self.ImportFile = {'file': open(self.file,'rb')}
+		self.OVCall = curl('POST',self.ImportURL,files=self.ImportFile)
+		if len(self.OVCall.errors) > 0:
+			self.errors.append(self.OVCall.errors)
+		else:
+			if "error_message" in self.jsonData and len(self.jsonData["error_message"]) > 0:
+				self.errors.append(self.jsonData["error_message"])
+			if "warnings" in self.jsonData and len(self.jsonData["warnings"]) > 0:
+				for warning in 
+				self.warnings.extend(self.jsonData["warnings"])
+			if "process_id" in self.jsonData:
+				self.processId = self.jsonData["process_id"]
+			if "process_status" in self.jsonData:
+				self.status = self.jsonData["process_status"]
+		self.request = self.OVCall.request
+		self.jsonData = self.OVCall.jsonData
+		return self.processId
+
+	def interrupt(self,ProcessID=None):
+		if ProcessID is None:
+			PID = self.processId
+		else:
+			PID = ProcessID
+		self.ImportURL = "https://%s:%s@%s/api/v3/exports/runs/%d/interrupt"%(
+			self.username,
+			self.password,
+			self.website,
+			PID
+			)
+		self.OVCall = curl('POST',self.ImportURL)
+		if len(self.OVCall.errors) > 0:
+			self.errors.append(self.OVCall.errors)
+		else:
+			self.processId = PID
+		self.request = self.OVCall.request
+		self.jsonData = self.OVCall.jsonData
+		if "status" in self.jsonData:
+			self.status = self.jsonData['status']
+
+	def getProcessStatus(self,ProcessID=None):
+		if ProcessID is None:
+			PID = self.processId
+		else:
+			PID = ProcessID
+		self.ImportURL = "https://%s:%s@%s/api/v3/exports/runs/%d"%(
+			self.username,
+			self.password,
+			self.website,
+			PID
+			)
+		self.OVCall = curl('GET',self.ImportURL)
+		if len(self.OVCall.errors) > 0:
+			self.errors.append(self.OVCall.errors)
+		else:
+			pass
+		self.request = self.OVCall.request
+		self.jsonData = self.OVCall.jsonData
+		if "status" in self.jsonData:
+			self.status = self.jsonData['status']
+		else:
+			self.status = 'No Status'
+		return self.status
+
 
 
 
