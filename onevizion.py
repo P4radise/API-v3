@@ -536,17 +536,43 @@ class Import(object):
 		if "status" in self.jsonData:
 			self.status = self.jsonData['status']
 
-	def getProcessStatus(self,ProcessID=None):
-		if ProcessID is None:
-			PID = self.processId
-		else:
-			PID = ProcessID
-		self.ImportURL = "https://%s:%s@%s/api/v3/imports/runs/%d"%(
+	def getProcessData(self,
+		processId=None,
+		status=None,
+		comments=None,
+		importName=None,
+		owner=None,
+		isPdf=None
+		):
+		def addParam(paramName,param):
+			if param is not None:
+				if not self.ImportURL.endswith("?"):
+					self.ImportURL += "&"
+				self.ImportURL += paramName + "=" +URLEncode(str(param))
+
+		self.ImportURL = "https://%s:%s@%s/api/v3/imports/runs"%(
 			self.username,
 			self.password,
 			self.website,
 			PID
 			)
+		if status is None and comments is None and importName is None and owner is None and isPdf is None:
+			self.ImportURL += "?"
+			if status is not None:
+				if type(status) is list:
+					self.ImportURL += status.split(",")
+				else:
+					self.ImportURL += str(status)
+			addParam('comments',comments)
+			addParam('import_name',importName)
+			addParam('owner',owner)
+			addParam('is_pdf',comments)
+		else:
+			if processId is None:
+				self.ImportURL += "/"+str(self.processId)
+			else:
+				self.ImportURL += "/"+str(processId)
+
 		self.OVCall = curl('GET',self.ImportURL)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
@@ -558,7 +584,7 @@ class Import(object):
 			self.status = self.jsonData['status']
 		else:
 			self.status = 'No Status'
-		return self.status
+		return self.jsonData
 
 
 
