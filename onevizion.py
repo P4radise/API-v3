@@ -479,7 +479,7 @@ class Import(object):
 		self.warnings = []
 		self.request = {}
 		self.jsonData = {}
-		self.processId = processId
+		self.processId = None
 		self.status = None
 		self.processList = []
 
@@ -501,19 +501,18 @@ class Import(object):
 			self.ImportURL += '&is_incremental=' + str(self.incremental)
 		self.ImportFile = {'file': open(self.file,'rb')}
 		self.OVCall = curl('POST',self.ImportURL,files=self.ImportFile)
+		self.request = self.OVCall.request
+		self.jsonData = self.OVCall.jsonData
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		else:
 			if "error_message" in self.jsonData and len(self.jsonData["error_message"]) > 0:
 				self.errors.append(self.jsonData["error_message"])
 			if "warnings" in self.jsonData and len(self.jsonData["warnings"]) > 0:
-				for warning in 
 				self.warnings.extend(self.jsonData["warnings"])
 			if "process_id" in self.jsonData:
 				self.processId = self.jsonData["process_id"]
 				self.status = self.jsonData["status"]
-		self.request = self.OVCall.request
-		self.jsonData = self.OVCall.jsonData
 
 	def interrupt(self,ProcessID=None):
 		if ProcessID is None:
@@ -553,14 +552,14 @@ class Import(object):
 		self.ImportURL = "https://%s:%s@%s/api/v3/imports/runs"%(
 			self.username,
 			self.password,
-			self.website,
-			PID
+			self.website
 			)
-		if status is None and comments is None and importName is None and owner is None and isPdf is None:
+		if status is not None or comments is not None or importName is not None or owner is not None or isPdf is not None:
 			self.ImportURL += "?"
 			if status is not None:
+				self.ImportURL += "status="
 				if type(status) is list:
-					self.ImportURL += status.split(",")
+					self.ImportURL += ",".join(status)
 				else:
 					self.ImportURL += str(status)
 			addParam('comments',comments)
@@ -667,7 +666,6 @@ class Export(object):
 			if "error_message" in self.jsonData and len(self.jsonData["error_message"]) > 0:
 				self.errors.append(self.jsonData["error_message"])
 			if "warnings" in self.jsonData and len(self.jsonData["warnings"]) > 0:
-				for warning in 
 				self.warnings.extend(self.jsonData["warnings"])
 			if "process_id" in self.jsonData:
 				self.processId = self.jsonData["process_id"]
@@ -685,8 +683,7 @@ class Export(object):
 		self.ImportURL = "https://%s:%s@%s/api/v3/exports/runs/%d/interrupt"%(
 			self.username,
 			self.password,
-			self.website,
-			PID
+			self.website
 			)
 		self.OVCall = curl('POST',self.ImportURL)
 		if len(self.OVCall.errors) > 0:
