@@ -95,24 +95,24 @@ class OVImport(object):
 	following properties:
 
 	Attributes:
-        website: A string representing the website's main URL for instance "trackor.onevizion.com".
-        username: the username used to login to the system
-        password: the password used to gain access to the system
-        impSpecId: the numeric identifier for the Import this file is to be applied to
-        action: "INSERT_UPDATE", "INSERT", or "UPDATE"
-        comments: Comments to add tot the Import
-        incemental: Optional value to pass to incremental import parameter
-        file: the path and file name of the file to be imported
+		URL: A string representing the website's main URL for instance "trackor.onevizion.com".
+		userName: the username used to login to the system
+		password: the password used to gain access to the system
+		impSpecId: the numeric identifier for the Import this file is to be applied to
+		action: "INSERT_UPDATE", "INSERT", or "UPDATE"
+		comments: Comments to add tot the Import
+		incemental: Optional value to pass to incremental import parameter
+		file: the path and file name of the file to be imported
 
-        errors: array of any errors encounterd
-        request: the requests object of call to the web api
-        data: the json data converted to python array
-        processId: the system processId returned from the API call
+		errors: array of any errors encounterd
+		request: the requests object of call to the web api
+		data: the json data converted to python array
+		processId: the system processId returned from the API call
 	"""
 
-	def __init__(self, website=None, username=None, password=None, impSpecId=None, file=None, action='INSERT_UPDATE', comments=None, incremental=None):
-		self.website = website
-		self.username = username
+	def __init__(self, URL=None, userName=None, password=None, impSpecId=None, file=None, action='INSERT_UPDATE', comments=None, incremental=None):
+		self.URL = URL
+		self.userName = userName
 		self.password = password
 		self.impSpecId = impSpecId
 		self.file = file
@@ -125,11 +125,11 @@ class OVImport(object):
 		self.processId = None
 
 		# If all info is filled out, go ahead and run the query.
-		if website != None and username != None and password != None and impSpecId != None and file != None:
+		if URL != None and userName != None and password != None and impSpecId != None and file != None:
 			self.makeCall()
 
 	def makeCall(self):
-		self.ImportURL = "https://" + self.username + ":" + self.password + "@" + self.website + "/configimport/SubmitUrlImport.do"
+		self.ImportURL = "https://" + self.userName + ":" + self.password + "@" + self.URL + "/configimport/SubmitUrlImport.do"
 		self.ImportParameters = {'impSpecId': self.impSpecId,'action': self.action}
 		if self.comments is not None:
 			self.ImportParameters['comments'] = self.comments
@@ -154,14 +154,14 @@ class Trackor(object):
 		Trackor instances with the like named methods.
 
 	Attributes:
-        trackorType: The name of the TrackorType being changed.
-        URL: A string representing the website's main URL for instance "trackor.onevizion.com".
-        username: the username used to login to the system
-        password: the password used to gain access to the system
+		trackorType: The name of the TrackorType being changed.
+		URL: A string representing the website's main URL for instance "trackor.onevizion.com".
+		userName: the username used to login to the system
+		password: the password used to gain access to the system
 
-        errors: array of any errors encounterd
-        OVCall: the requests object of call to the web api
-        jsonData: the json data converted to python array
+		errors: array of any errors encounterd
+		OVCall: the requests object of call to the web api
+		jsonData: the json data converted to python array
 	"""
 
 	def __init__(self, trackorType = "", URL = "", userName="", password=""):
@@ -365,13 +365,13 @@ class WorkPlan(object):
 		WorkPlan instances with the like named methods.
 
 	Attributes:
-        URL: A string representing the website's main URL for instance "trackor.onevizion.com".
-        username: the username used to login to the system
-        password: the password used to gain access to the system
+		URL: A string representing the website's main URL for instance "trackor.onevizion.com".
+		userName: the username used to login to the system
+		password: the password used to gain access to the system
 
-        errors: array of any errors encounterd
-        OVCall: the requests object of call to the web api
-        jsonData: the json data converted to python array
+		errors: array of any errors encounterd
+		OVCall: the requests object of call to the web api
+		jsonData: the json data converted to python array
 	"""
 
 	def __init__(self, URL = "", userName="", password=""):
@@ -458,8 +458,8 @@ class Import(object):
 
 	def __init__(
 		self, 
-		website=None, 
-		username=None, 
+		URL=None, 
+		userName=None, 
 		password=None, 
 		impSpecId=None, 
 		file=None, 
@@ -467,8 +467,8 @@ class Import(object):
 		comments=None, 
 		incremental=None
 		):
-		self.website = website
-		self.username = username
+		self.URL = URL
+		self.userName = userName
 		self.password = password
 		self.impSpecId = impSpecId
 		self.file = file
@@ -484,14 +484,14 @@ class Import(object):
 		self.processList = []
 
 		# If all info is filled out, go ahead and run the query.
-		if website != None and username != None and password != None and impSpecId != None and file != None:
+		if URL != None and userName != None and password != None and impSpecId != None and file != None:
 			self.run()
 
 	def run(self):
 		self.ImportURL = "https://%s:%s@%s/api/v3/imports/%d/run?action=%s"%(
-			self.username,
+			self.userName,
 			self.password,
-			self.website,
+			self.URL,
 			self.impSpecId,
 			self.action
 			)
@@ -520,9 +520,9 @@ class Import(object):
 		else:
 			PID = ProcessID
 		self.ImportURL = "https://%s:%s@%s/api/v3/imports/runs/%d/interrupt"%(
-			self.username,
+			self.userName,
 			self.password,
-			self.website,
+			self.URL,
 			PID
 			)
 		self.OVCall = curl('POST',self.ImportURL)
@@ -550,9 +550,9 @@ class Import(object):
 				self.ImportURL += paramName + "=" +URLEncode(str(param))
 
 		self.ImportURL = "https://%s:%s@%s/api/v3/imports/runs"%(
-			self.username,
+			self.userName,
 			self.password,
-			self.website
+			self.URL
 			)
 		if status is not None or comments is not None or importName is not None or owner is not None or isPdf is not None:
 			self.ImportURL += "?"
@@ -594,8 +594,8 @@ class Export(object):
 
 	def __init__(
 		self, 
-		website=None, 
-		username=None, 
+		URL=None, 
+		userName=None, 
 		password=None, 
 		trackorType=None,
 		filters={},
@@ -607,8 +607,8 @@ class Export(object):
 		fileFields=None,
 		comments=None
 		):
-		self.website = website
-		self.username = username
+		self.URL = URL
+		self.userName = userName
 		self.password = password
 		self.trackorType = trackorType
 		self.exportMode = exportMode
@@ -622,44 +622,46 @@ class Export(object):
 		self.errors = []
 		self.request = {}
 		self.jsonData = {}
-		self.processId = processId
 		self.status = None
+		self.processId = None
 		self.processList = []
+		self.content = None
 
 		# If all info is filled out, go ahead and run the query.
-		if website != None and username != None and password != None and impSpecId != None and file != None:
+		if URL is not None and userName is not None and password is not None and trackorType is not None and (viewOptions is not None or len(fields)>0 or fileFields is not None) and (filterOptions is not None or len(filters)>0):
 			self.run()
 
 	def run(self):
 		self.ImportURL = "https://%s:%s@%s/api/v3/exports/%s/run?export_mode=%s&delivery=%s"%(
-			self.username,
+			self.userName,
 			self.password,
-			self.website,
+			self.URL,
 			self.trackorType,
 			self.exportMode,
 			self.delivery
 			)
 
 		ViewSection = ""
-		if viewOptions is None:
-			ViewSection = '&fields=' + ",".join(fields)
+		if self.viewOptions is None:
+			ViewSection = '&fields=' + ",".join(self.fields)
 		else:
-			ViewSection = '&view=' + URLEncode(viewOptions)
+			ViewSection = '&view=' + URLEncode(self.viewOptions)
 		self.ImportURL += ViewSection
 
 		FilterSection = "&"
-		if filterOptions is None:
-			for key,value in filters.items():
+		if self.filterOptions is None:
+			for key,value in self.filters.items():
 				FilterSection += key + '=' + URLEncode(str(value)) + '&'
 			FilterSection = FilterSection.rstrip('?&')
 		else:
-			FilterSection = "&filter="+URLEncode(filterOptions)
+			FilterSection = "&filter="+URLEncode(self.filterOptions)
 		self.ImportURL += FilterSection
 
 		if self.comments is not None:
 			self.ImportURL += '&comments=' + URLEncode(self.comments)
-		self.ImportFile = {'file': open(self.file,'rb')}
-		self.OVCall = curl('POST',self.ImportURL,files=self.ImportFile)
+		self.OVCall = curl('POST',self.ImportURL)
+		self.request = self.OVCall.request
+		self.jsonData = self.OVCall.jsonData
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		else:
@@ -669,10 +671,8 @@ class Export(object):
 				self.warnings.extend(self.jsonData["warnings"])
 			if "process_id" in self.jsonData:
 				self.processId = self.jsonData["process_id"]
-			if "process_status" in self.jsonData:
-				self.status = self.jsonData["process_status"]
-		self.request = self.OVCall.request
-		self.jsonData = self.OVCall.jsonData
+			if "status" in self.jsonData:
+				self.status = self.jsonData["status"]
 		return self.processId
 
 	def interrupt(self,ProcessID=None):
@@ -681,9 +681,9 @@ class Export(object):
 		else:
 			PID = ProcessID
 		self.ImportURL = "https://%s:%s@%s/api/v3/exports/runs/%d/interrupt"%(
-			self.username,
+			self.userName,
 			self.password,
-			self.website
+			self.URL
 			)
 		self.OVCall = curl('POST',self.ImportURL)
 		if len(self.OVCall.errors) > 0:
@@ -701,23 +701,43 @@ class Export(object):
 		else:
 			PID = ProcessID
 		self.ImportURL = "https://%s:%s@%s/api/v3/exports/runs/%d"%(
-			self.username,
+			self.userName,
 			self.password,
-			self.website,
+			self.URL,
 			PID
 			)
 		self.OVCall = curl('GET',self.ImportURL)
-		if len(self.OVCall.errors) > 0:
-			self.errors.append(self.OVCall.errors)
-		else:
-			pass
 		self.request = self.OVCall.request
 		self.jsonData = self.OVCall.jsonData
+		if len(self.OVCall.errors) > 0:
+			self.errors.append(self.OVCall.errors)
 		if "status" in self.jsonData:
 			self.status = self.jsonData['status']
 		else:
 			self.status = 'No Status'
 		return self.status
+
+	def getFile(self,ProcessID=None):
+		if ProcessID is None:
+			PID = self.processId
+		else:
+			PID = ProcessID
+		self.ImportURL = "https://%s:%s@%s/api/v3/exports/runs/%d/file"%(
+			self.userName,
+			self.password,
+			self.URL,
+			PID
+			)
+		print self.ImportURL
+		self.OVCall = curl('GET',self.ImportURL)
+		self.request = self.OVCall.request
+		self.jsonData = self.OVCall.jsonData
+		if len(self.OVCall.errors) > 0:
+			self.errors.append(self.OVCall.errors)
+		else:
+			self.content = self.request.content
+		return self.content
+
 
 
 
