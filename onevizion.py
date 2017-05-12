@@ -760,7 +760,7 @@ class EMail(object):
 		files: array of filename/paths to attach
 	"""
 
-	def __init__(self):
+	def __init__(self,SMTP={}):
 		self.server = "mail.onevizion.com"
 		self.port = 465
 		self.tls = "False"
@@ -774,8 +774,10 @@ class EMail(object):
 		self.body = ""
 		self.files = []
 		self.duration = 0
+		if 'UserName' in SMTP and 'Password' in SMTP and 'Server' in SMTP:
+			self.passwordData(SMTP)
 
-	def passwordData(SMTP={}):
+	def passwordData(self,SMTP={}):
 		if 'UserName' not in SMTP or 'Password' not in SMTP or 'Server' not in SMTP:
 			raise ("UserName,Password,and Server are required in the PasswordData json")
 		else:
@@ -783,7 +785,7 @@ class EMail(object):
 			self.userName = SMTP['UserName']
 			self.password = SMTP['Password']
 		if 'Port' in SMTP:
-			self.port = SMTP['Port']
+			self.port = int(SMTP['Port'])
 		if 'TLS' in SMTP:
 			self.tls = SMTP['TLS']
 		if 'To' in SMTP:
