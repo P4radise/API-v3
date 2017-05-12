@@ -129,14 +129,14 @@ class OVImport(object):
 			self.makeCall()
 
 	def makeCall(self):
-		self.ImportURL = "https://" + self.userName + ":" + self.password + "@" + self.URL + "/configimport/SubmitUrlImport.do"
+		self.ImportURL = "https://" + self.URL + "/configimport/SubmitUrlImport.do"
 		self.ImportParameters = {'impSpecId': self.impSpecId,'action': self.action}
 		if self.comments is not None:
 			self.ImportParameters['comments'] = self.comments
 		if self.incremental is not None:
 			self.ImportParameters['isIncremental'] = self.incremental
 		self.ImportFile = {'file': open(self.file,'rb')}
-		self.curl = curl('POST',self.ImportURL,files=self.ImportFile,data=self.ImportParameters)
+		self.curl = curl('POST',self.ImportURL,files=self.ImportFile,data=self.ImportParameters,auth=(self.userName,self.password))
 		if len(self.curl.errors) > 0:
 			self.errors.append(self.curl.errors)
 		elif "userMessages" in self.jsonData and len(self.jsonData["userMessages"]) > 0:
@@ -181,10 +181,10 @@ class Trackor(object):
 		"""
 		FilterSection = "trackor_id=" + str(trackorId)
 
-		URL = "https://%s:%s@%s/api/v3/trackor_types/%s/trackors?%s" % (self.UserName, self.password, self.URL, self.TrackorType, FilterSection)
+		URL = "https://%s/api/v3/trackor_types/%s/trackors?%s" % (self.URL, self.TrackorType, FilterSection)
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('DELETE',URL)
+		self.OVCall = curl('DELETE',URL,auth=(self.userName,self.password))
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		self.jsonData = self.OVCall.jsonData
@@ -235,9 +235,7 @@ class Trackor(object):
 			PageSection = "&page="+str(page)+"&per_page="+str(perPage)
 
 
-		URL = "https://%s:%s@%s/api/v3/trackor_types/%s/trackors?%s&%s%s%s" % (
-			self.UserName, 
-			self.password, 
+		URL = "https://%s/api/v3/trackor_types/%s/trackors?%s&%s%s%s" % (
 			self.URL, 
 			self.TrackorType, 
 			FilterSection, 
@@ -245,7 +243,7 @@ class Trackor(object):
 			SortSection,
 			PageSection
 			)
-		self.OVCall = curl('GET',URL)
+		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		self.jsonData = self.OVCall.jsonData
@@ -294,14 +292,14 @@ class Trackor(object):
 			Filter = Filter + key + '=' + URLEncode(str(value)) + '&'
 		Filter = Filter.rstrip('?&')
 
-		URL = "https://%s:%s@%s/api/v3/trackor_types/%s/trackor%s" % (self.UserName, self.password, self.URL, self.TrackorType, Filter)
+		URL = "https://%s/api/v3/trackor_types/%s/trackor%s" % (self.URL, self.TrackorType, Filter)
 		#payload = open('temp_payload.json','rb')
 		Headers = {'content-type': 'application/x-www-form-urlencoded'}
 		if charset != "":
 			Headers['charset'] = charset
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('PUT',URL, data=JSON, headers=Headers)
+		self.OVCall = curl('PUT',URL, data=JSON, headers=Headers, auth=(self.userName,self.password))
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		self.jsonData = self.OVCall.jsonData
@@ -346,14 +344,14 @@ class Trackor(object):
 		JSONObj["parents"] = ParentsSection
 		JSON = json.dumps(JSONObj)
 
-		URL = "https://%s:%s@%s/api/v3/trackor_types/%s/trackor" % (self.UserName, self.password, self.URL, self.TrackorType)
+		URL = "https://%s/api/v3/trackor_types/%s/trackor" % (self.URL, self.TrackorType)
 		#payload = open('temp_payload.json','rb')
 		Headers = {'content-type': 'application/json'}
 		if charset != "":
 			Headers['charset'] = charset
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('POST',URL, data=JSON, headers=Headers)
+		self.OVCall = curl('POST',URL, data=JSON, headers=Headers, auth=(self.userName,self.password))
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		self.jsonData = self.OVCall.jsonData
@@ -398,10 +396,10 @@ class WorkPlan(object):
 			#1234
 			FilterSection = str(trackorId)
 
-		URL = "https://%s:%s@%s/api/v3/wps/%s" % (self.UserName, self.password, self.URL, FilterSection)
+		URL = "https://%s/api/v3/wps/%s" % (self.URL, FilterSection)
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('GET',URL)
+		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		self.jsonData = self.OVCall.jsonData
@@ -422,15 +420,15 @@ class Task(object):
 			identified either by workplanId, workplanId and orderNumber or by a taskId
 		"""
 		if taskId is not None:
-			URL = "https://%s:%s@%s/api/v3/tasks/%d" % (self.UserName, self.password, self.URL, taskId)
+			URL = "https://%s/api/v3/tasks/%d" % (self.URL, taskId)
 		elif orderNumber is not None:
-			URL = "https://%s:%s@%s/api/v3/tasks?workplan_id=%d&order_number=%d" % (self.UserName, self.password, self.URL, workplanId, orderNumber)
+			URL = "https://%s/api/v3/tasks?workplan_id=%d&order_number=%d" % (self.URL, workplanId, orderNumber)
 		else:
-			URL = "https://%s:%s@%s/api/v3/wps/%d/tasks" % (self.UserName, self.password, self.URL, workplanId)
+			URL = "https://%s/api/v3/wps/%d/tasks" % (self.URL, workplanId)
 
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('GET',URL)
+		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		self.jsonData = self.OVCall.jsonData
@@ -443,12 +441,12 @@ class Task(object):
 
 		JSON = json.dumps(fields)
 
-		URL = "https://%s:%s@%s/api/v3/tasks/%d" % (self.UserName, self.password, self.URL, taskId)
+		URL = "https://%s/api/v3/tasks/%d" % (self.URL, taskId)
 		#payload = open('temp_payload.json','rb')
 		Headers = {'content-type': 'application/x-www-form-urlencoded'}
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('PUT',URL, data=JSON, headers=Headers)
+		self.OVCall = curl('PUT',URL, data=JSON, headers=Headers, auth=(self.userName,self.password))
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		self.jsonData = self.OVCall.jsonData
@@ -488,9 +486,7 @@ class Import(object):
 			self.run()
 
 	def run(self):
-		self.ImportURL = "https://%s:%s@%s/api/v3/imports/%d/run?action=%s"%(
-			self.userName,
-			self.password,
+		self.ImportURL = "https://%s/api/v3/imports/%d/run?action=%s"%(
 			self.URL,
 			self.impSpecId,
 			self.action
@@ -500,7 +496,7 @@ class Import(object):
 		if self.incremental is not None:
 			self.ImportURL += '&is_incremental=' + str(self.incremental)
 		self.ImportFile = {'file': open(self.file,'rb')}
-		self.OVCall = curl('POST',self.ImportURL,files=self.ImportFile)
+		self.OVCall = curl('POST',self.ImportURL,files=self.ImportFile,auth=(self.userName,self.password))
 		self.request = self.OVCall.request
 		self.jsonData = self.OVCall.jsonData
 		if len(self.OVCall.errors) > 0:
@@ -519,13 +515,11 @@ class Import(object):
 			PID = self.processId
 		else:
 			PID = ProcessID
-		self.ImportURL = "https://%s:%s@%s/api/v3/imports/runs/%d/interrupt"%(
-			self.userName,
-			self.password,
+		self.ImportURL = "https://%s/api/v3/imports/runs/%d/interrupt"%(
 			self.URL,
 			PID
 			)
-		self.OVCall = curl('POST',self.ImportURL)
+		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		else:
@@ -549,9 +543,7 @@ class Import(object):
 					self.ImportURL += "&"
 				self.ImportURL += paramName + "=" +URLEncode(str(param))
 
-		self.ImportURL = "https://%s:%s@%s/api/v3/imports/runs"%(
-			self.userName,
-			self.password,
+		self.ImportURL = "https://%s/api/v3/imports/runs"%(
 			self.URL
 			)
 		if status is not None or comments is not None or importName is not None or owner is not None or isPdf is not None:
@@ -572,7 +564,7 @@ class Import(object):
 			else:
 				self.ImportURL += "/"+str(processId)
 
-		self.OVCall = curl('GET',self.ImportURL)
+		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		else:
@@ -632,9 +624,7 @@ class Export(object):
 			self.run()
 
 	def run(self):
-		self.ImportURL = "https://%s:%s@%s/api/v3/exports/%s/run?export_mode=%s&delivery=%s"%(
-			self.userName,
-			self.password,
+		self.ImportURL = "https://%s/api/v3/exports/%s/run?export_mode=%s&delivery=%s"%(
 			self.URL,
 			self.trackorType,
 			self.exportMode,
@@ -659,7 +649,7 @@ class Export(object):
 
 		if self.comments is not None:
 			self.ImportURL += '&comments=' + URLEncode(self.comments)
-		self.OVCall = curl('POST',self.ImportURL)
+		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
 		self.request = self.OVCall.request
 		self.jsonData = self.OVCall.jsonData
 		if len(self.OVCall.errors) > 0:
@@ -680,12 +670,11 @@ class Export(object):
 			PID = self.processId
 		else:
 			PID = ProcessID
-		self.ImportURL = "https://%s:%s@%s/api/v3/exports/runs/%d/interrupt"%(
-			self.userName,
-			self.password,
-			self.URL
+		self.ImportURL = "https://%s/api/v3/exports/runs/%d/interrupt"%(
+			self.URL,
+			PID
 			)
-		self.OVCall = curl('POST',self.ImportURL)
+		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		else:
@@ -700,13 +689,11 @@ class Export(object):
 			PID = self.processId
 		else:
 			PID = ProcessID
-		self.ImportURL = "https://%s:%s@%s/api/v3/exports/runs/%d"%(
-			self.userName,
-			self.password,
+		self.ImportURL = "https://%s/api/v3/exports/runs/%d"%(
 			self.URL,
 			PID
 			)
-		self.OVCall = curl('GET',self.ImportURL)
+		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
 		self.request = self.OVCall.request
 		self.jsonData = self.OVCall.jsonData
 		if len(self.OVCall.errors) > 0:
@@ -722,14 +709,12 @@ class Export(object):
 			PID = self.processId
 		else:
 			PID = ProcessID
-		self.ImportURL = "https://%s:%s@%s/api/v3/exports/runs/%d/file"%(
-			self.userName,
-			self.password,
+		self.ImportURL = "https://%s/api/v3/exports/runs/%d/file"%(
 			self.URL,
 			PID
 			)
 		print self.ImportURL
-		self.OVCall = curl('GET',self.ImportURL)
+		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
 		self.request = self.OVCall.request
 		self.jsonData = self.OVCall.jsonData
 		if len(self.OVCall.errors) > 0:
