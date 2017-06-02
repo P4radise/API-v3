@@ -243,7 +243,7 @@ class Trackor(object):
 			SortSection,
 			PageSection
 			)
-		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
+		self.OVCall = curl('GET',URL,auth=(self.UserName,self.password))
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		self.jsonData = self.OVCall.jsonData
