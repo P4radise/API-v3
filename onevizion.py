@@ -282,8 +282,10 @@ class Trackor(object):
 				FilterPart[fkey]=fvalue
 			ParentsSection["filter"] = FilterPart
 
-		JSONObj["fields"] = FieldsSection
-		JSONObj["parents"] = ParentsSection
+		if len(FieldsSection) > 0:
+			JSONObj["fields"] = FieldsSection
+		if len(ParentsSection) > 0:
+			JSONObj["parents"] = ParentsSection
 		JSON = json.dumps(JSONObj)
 
 		# Build up the filter to find the unique Tackor instance
@@ -340,8 +342,10 @@ class Trackor(object):
 				FilterPart[fkey]=fvalue
 			ParentsSection["filter"] = FilterPart
 
-		JSONObj["fields"] = FieldsSection
-		JSONObj["parents"] = ParentsSection
+		if len(FieldsSection) > 0:
+			JSONObj["fields"] = FieldsSection
+		if len(ParentsSection) > 0:
+			JSONObj["parents"] = ParentsSection
 		JSON = json.dumps(JSONObj)
 
 		URL = "https://%s/api/v3/trackor_types/%s/trackor" % (self.URL, self.TrackorType)
