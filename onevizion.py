@@ -167,7 +167,7 @@ class Trackor(object):
 	def __init__(self, trackorType = "", URL = "", userName="", password=""):
 		self.TrackorType = trackorType
 		self.URL = URL
-		self.UserName = userName
+		self.userName = userName
 		self.password = password
 		self.errors = []
 		self.jsonData = {}
@@ -243,7 +243,7 @@ class Trackor(object):
 			SortSection,
 			PageSection
 			)
-		self.OVCall = curl('GET',URL,auth=(self.UserName,self.password))
+		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		self.jsonData = self.OVCall.jsonData
@@ -378,7 +378,7 @@ class WorkPlan(object):
 
 	def __init__(self, URL = "", userName="", password=""):
 		self.URL = URL
-		self.UserName = userName
+		self.userName = userName
 		self.password = password
 		self.errors = []
 		self.jsonData = {}
@@ -413,7 +413,7 @@ class Task(object):
 
 	def __init__(self, URL = "", userName="", password=""):
 		self.URL = URL
-		self.UserName = userName
+		self.userName = userName
 		self.password = password
 		self.errors = []
 		self.jsonData = {}
@@ -739,7 +739,8 @@ class EMail(object):
 	Attributes:
 		server: the SSL SMTP server for the mail connection
 		port: the port to conenct to- 465 by default
-		tls: True if TLS is needed, else false.
+		security: None, SSL, or STARTTLS
+		tls: True if TLS is needed, else false.  Provided for Backwards compatibility
 		userName: the "From" and login to the SMTP server
 		password: the password to conenct to the SMTP server
 		to: array of email addresses to send the message to
@@ -751,8 +752,9 @@ class EMail(object):
 
 	def __init__(self,SMTP={}):
 		self.server = "mail.onevizion.com"
-		self.port = 465
-		self.tls = "False"
+		self.port = 587
+		self.security = "STARTTLS"
+		self.tls = "False" 
 		self.userName = ""
 		self.password = ""
 		self.to = []
@@ -777,6 +779,9 @@ class EMail(object):
 			self.port = int(SMTP['Port'])
 		if 'TLS' in SMTP:
 			self.tls = SMTP['TLS']
+			self.security = 'STARTTLS'
+		if 'Security' in SMTP:
+			self.security = SMTP['Security']
 		if 'To' in SMTP:
 			if type(SMTP['To']) is list:
 				self.to.extend(SMTP['To'])
@@ -856,13 +861,13 @@ class EMail(object):
 		before = datetime.datetime.utcnow()
 
 		
-		if self.tls in [True,1,"1","True","TRUE","true","yes","Yes","YES"]:
+		if self.security.upper() in ['STARTTLS','TLS']:
 			send = smtplib.SMTP(self.server, int(self.port))
-			#send.ehlo()
 			send.starttls()
-			#send.ehlo()
-		else:
+		elif self.security.upper() in ['SSL','SSL/TLS']:
 			send = smtplib.SMTP_SSL(self.server, self.port)
+		else:
+			send = smtplib.SMTP(self.server, int(self.port))
 		send.login(str(self.userName), str(self.password))
 		send.sendmail(str(self.userName),self.to, msg.as_string())
 		send.quit()
@@ -878,7 +883,8 @@ PasswordExample = """Password File required.  Example:
 		"UserName": "mgreene@onevizion.com",
 		"Password": "IFIAJKAFJBJnfeN",
 		"Server": "mail.onevizion.com",
-		"Port": "465"
+		"Port": "587",
+		"Security": "STARTTLS"
 	},
 	"trackor.onevizion.com": {
 		"UserName": "mgreene",
