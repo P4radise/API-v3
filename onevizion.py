@@ -352,10 +352,8 @@ class Trackor(object):
 		if len(ParentsSection) > 0:
 			JSONObj["parents"] = ParentsSection
 		JSON = json.dumps(JSONObj)
-		print JSON
 
 		URL = "https://%s/api/v3/trackor_types/%s/trackors" % (self.URL, self.TrackorType)
-		print URL
 		#payload = open('temp_payload.json','rb')
 		Headers = {'content-type': 'application/json'}
 		if charset != "":
