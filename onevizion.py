@@ -269,24 +269,27 @@ class Trackor(object):
 			if isinstance(value, dict):
 				CompundField = {}
 				for skey,svalue in value.items():
-					CompundField[skey] = svalue
+					CompundField[skey] = JSONEndValue(svalue)
 				FieldsSection[key] = CompoundField
 			else:
-				FieldsSection[key] = value
+				FieldsSection[key] = JSONEndValue(value)
 
-		ParentsSection = {}
+		ParentsSection = []
+		Parentx={}
 		for key, value in parents.items():
-			ParentsSection["trackor_type"] = key
+			Parentx["trackor_type"] = key
 			FilterPart = {}
 			for fkey,fvalue in value.items():
-				FilterPart[fkey]=fvalue
-			ParentsSection["filter"] = FilterPart
+				FilterPart[fkey]=JSONEndValue(fvalue)
+			Parentx["filter"] = FilterPart
+			ParentsSection.append(Parentx)
 
 		if len(FieldsSection) > 0:
 			JSONObj["fields"] = FieldsSection
 		if len(ParentsSection) > 0:
 			JSONObj["parents"] = ParentsSection
 		JSON = json.dumps(JSONObj)
+		print JSON
 
 		# Build up the filter to find the unique Tackor instance
 		Filter = '?'
@@ -294,7 +297,7 @@ class Trackor(object):
 			Filter = Filter + key + '=' + URLEncode(str(value)) + '&'
 		Filter = Filter.rstrip('?&')
 
-		URL = "https://%s/api/v3/trackor_types/%s/trackor%s" % (self.URL, self.TrackorType, Filter)
+		URL = "https://%s/api/v3/trackor_types/%s/trackors%s" % (self.URL, self.TrackorType, Filter)
 		#payload = open('temp_payload.json','rb')
 		Headers = {'content-type': 'application/x-www-form-urlencoded'}
 		if charset != "":
@@ -329,26 +332,30 @@ class Trackor(object):
 			if isinstance(value, dict):
 				CompundField = {}
 				for skey,svalue in value.items():
-					CompundField[skey] = svalue
+					CompundField[skey] = JSONEndValue(svalue)
 				FieldsSection[key] = CompoundField
 			else:
-				FieldsSection[key] = value
+				FieldsSection[key] = JSONEndValue(value)
 
-		ParentsSection = {}
+		ParentsSection = []
+		Parentx={}
 		for key, value in parents.items():
-			ParentsSection["trackor_type"] = key
+			Parentx["trackor_type"] = key
 			FilterPart = {}
 			for fkey,fvalue in value.items():
-				FilterPart[fkey]=fvalue
-			ParentsSection["filter"] = FilterPart
+				FilterPart[fkey]=JSONEndValue(fvalue)
+			Parentx["filter"] = FilterPart
+			ParentsSection.append(Parentx)
 
 		if len(FieldsSection) > 0:
 			JSONObj["fields"] = FieldsSection
 		if len(ParentsSection) > 0:
 			JSONObj["parents"] = ParentsSection
 		JSON = json.dumps(JSONObj)
+		print JSON
 
-		URL = "https://%s/api/v3/trackor_types/%s/trackor" % (self.URL, self.TrackorType)
+		URL = "https://%s/api/v3/trackor_types/%s/trackors" % (self.URL, self.TrackorType)
+		print URL
 		#payload = open('temp_payload.json','rb')
 		Headers = {'content-type': 'application/json'}
 		if charset != "":
@@ -745,7 +752,7 @@ class EMail(object):
 		password: the password to conenct to the SMTP server
 		to: array of email addresses to send the message to
 		subject: subject of the message
-		info: dictionary of inof to send in the message
+		info: dictionary of info to send in the message
 		message: main message to send
 		files: array of filename/paths to attach
 	"""
@@ -769,6 +776,17 @@ class EMail(object):
 			self.passwordData(SMTP)
 
 	def passwordData(self,SMTP={}):
+		"""This allows you to pass the SMTP type object from a PasswordData.  Should be a Dictionary.
+
+		Possible Attributes(Dictionary Keys) are:
+			UserName: UserName for SMTP server login (required)
+			Password: Password for SMTP login (required)
+			Server: SMTP server to connect (required)
+			Port: Port for server to connect, default 587
+			Security: Security Type, can be STARTTLS, SSL, None.
+			To: Who to send the email to.  Can be single email address as string , or list of strings
+			CC: CC email, can be single email adress as sting, or a list of strings.
+		"""
 		if 'UserName' not in SMTP or 'Password' not in SMTP or 'Server' not in SMTP:
 			raise ("UserName,Password,and Server are required in the PasswordData json")
 		else:
@@ -795,6 +813,8 @@ class EMail(object):
 
 
 	def sendmail(self):
+		"""Main work body, sends email with preconfigured attributes
+		"""
 		import mimetypes
 
 		from optparse import OptionParser
@@ -884,7 +904,9 @@ PasswordExample = """Password File required.  Example:
 		"Password": "IFIAJKAFJBJnfeN",
 		"Server": "mail.onevizion.com",
 		"Port": "587",
-		"Security": "STARTTLS"
+		"Security": "STARTTLS",
+		"To":['jsmith@onevizion.com','mjones@onevizion.com'],
+		"CC":['bbrown@xyz.com','eric.goete@xyz.com']
 	},
 	"trackor.onevizion.com": {
 		"UserName": "mgreene",
@@ -961,6 +983,18 @@ def JSONValue(strToEncode):
 		return str(strToEncode)
 	else:
 		return '"'+JSONEncode(strToEncode)+'"'
+
+def JSONEndValue(objToEncode):
+	if objToEncode is None:
+		return 'null'
+	elif isinstance(objToEncode, (int, float)):
+		return objToEncode
+	elif isinstance(objToEncode, datetime.datetime):
+		return objToEncode.strftime('%Y-%m-%dT%H:%M:%S')
+	elif isinstance(objToEncode, datetime.date):
+		return objToEncode.strftime('%Y-%m-%d')
+	else:
+		return str(objToEncode)
 
 
 
