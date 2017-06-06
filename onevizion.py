@@ -267,9 +267,9 @@ class Trackor(object):
 		FieldsSection = {}
 		for key, value in fields.items():
 			if isinstance(value, dict):
-				CompundField = {}
+				CompoundField = {}
 				for skey,svalue in value.items():
-					CompundField[skey] = JSONEndValue(svalue)
+					CompoundField[skey] = JSONEndValue(svalue)
 				FieldsSection[key] = CompoundField
 			else:
 				FieldsSection[key] = JSONEndValue(value)
