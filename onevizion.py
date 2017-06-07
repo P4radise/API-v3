@@ -194,6 +194,7 @@ class Trackor(object):
 		trackorId=None, 
 		filterOptions=None, 
 		filters={}, 
+		search=None,
 		viewOptions=None, 
 		fields=[],
 		sort={},
@@ -204,25 +205,47 @@ class Trackor(object):
 			identified either by trackorId or filterOptions, and data fields to be retieved must be
 			identified either by viewOptions or a list of fields.
 			
-			fields is an array of strings that are teh Configured Field Names.
+			fields is an array of strings that are the Configured Field Names.
 		"""
 		
-		ViewSection = ""
-		if viewOptions is None:
-			ViewSection = 'fields=' + ",".join(fields)
-		else:
-			ViewSection = 'view=' + URLEncode(viewOptions)
+		URL = "https://{Website}/api/v3/trackor_types/{TrackorType}/trackors".format(
+			Website=self.URL, 
+			TrackorType=self.TrackorType
+			)
+		Method='GET'
 
 		FilterSection = ""
+		SearchBody = {}
 		if trackorId is None:
 			if filterOptions is None:
-				for key,value in filters.items():
-					FilterSection = FilterSection + key + '=' + URLEncode(str(value)) + '&'
-				FilterSection = FilterSection.rstrip('?&')
+				if search is None:
+					#Filtering based on "filters" fields
+					for key,value in filters.items():
+						FilterSection = FilterSection + key + '=' + URLEncode(str(value)) + '&'
+					FilterSection = FilterSection.rstrip('?&')
+				else:
+					#Filtering based on Search Criteria
+					URL += "/search" 
+					SearchBody = {"data": search}
+					Method='POST'
 			else:
+				#Filtering basd on filterOptions
 				FilterSection = "filter="+URLEncode(filterOptions)
 		else: 
-			FilterSection = "trackor_id=" + str(trackorId)
+			#Filtering for specific TrackorID
+			URL = "https://{Website}/api/v3/trackors/{TrackorID}".format(
+				Website=self.URL, 
+				TrackorID=str(trackorId)
+				)
+
+		if len(FilterSection) == 0:
+			ViewSection = ""
+		else: 
+			ViewSection = "&"
+		if viewOptions is None:
+			ViewSection += 'fields=' + ",".join(fields)
+		else:
+			ViewSection += 'view=' + URLEncode(viewOptions)
 
 		SortSection=""
 		for key,value in sort.items():
@@ -234,23 +257,19 @@ class Trackor(object):
 		if page is not None:
 			PageSection = "&page="+str(page)+"&per_page="+str(perPage)
 
+		URL += "?"+FilterSection+ViewSection+SortSection+PageSection
 
-		URL = "https://%s/api/v3/trackor_types/%s/trackors?%s&%s%s%s" % (
-			self.URL, 
-			self.TrackorType, 
-			FilterSection, 
-			ViewSection,
-			SortSection,
-			PageSection
-			)
-		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
+		self.errors = []
+		self.jsonData = {}
+		self.OVCall = curl(Method,URL,auth=(self.userName,self.password),**SearchBody)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		self.jsonData = self.OVCall.jsonData
 
 
-	def update(self, filters={}, fields={}, parents={}, charset=""):
+	def update(self, trackorId=None, filters={}, fields={}, parents={}, charset=""):
 		""" Update data in a list of fields for a Trackor instance.
+			"trackorId" is the direct unique identifier in the databse for the record.  Use this or Filters.
 			"filters" is a list of ConfigFieldName:value pairs that finds the unique 
 				Trackor instance to be updated.  Use "TrackorType.ConfigFieldName" to filter
 				with parent fields.
@@ -292,12 +311,24 @@ class Trackor(object):
 		print JSON
 
 		# Build up the filter to find the unique Tackor instance
-		Filter = '?'
-		for key,value in filters.items():
-			Filter = Filter + key + '=' + URLEncode(str(value)) + '&'
-		Filter = Filter.rstrip('?&')
+		if trackorId is None:
+			Filter = '?'
+			for key,value in filters.items():
+				Filter = Filter + key + '=' + URLEncode(str(value)) + '&'
+			Filter = Filter.rstrip('?&')
+			URL = "https://{Website}/api/v3/trackor_types/{TrackorType}/trackors{Filter}".format(
+					Website=self.URL, 
+					TrackorType=self.TrackorType, 
+					Filter=Filter
+					)
+		else:
+			URL = "https://{Website}/api/v3/trackors/{TrackorID}".format(
+					Website=self.URL, 
+					TrackorID=trackorId
+					)
 
-		URL = "https://%s/api/v3/trackor_types/%s/trackors%s" % (self.URL, self.TrackorType, Filter)
+		print URL
+		print JSON
 		#payload = open('temp_payload.json','rb')
 		Headers = {'content-type': 'application/x-www-form-urlencoded'}
 		if charset != "":
@@ -365,6 +396,98 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 		self.jsonData = self.OVCall.jsonData
 
+	def assignWorkplan(self,trackorId, workplanTemplate, name=None, startDate=None, finishDate=None):
+		""" Assign a Workplan to a given Trackor Record.
+
+			trackorID: the system ID for the particular Trackor record that this is being assigned to.
+			workplanTemplate: the name of the Workplan Template to assign
+			name: Name given to the newly created Workplan instance, by default it is the WPTemplate name
+			startDate: if given will set the Start Date of the Workplan and calculate baseline dates
+			finishDate: if given will place the finish of the Workplan and backwards calculate dates.
+		"""
+
+		URL = "https://{website}/api/v3/trackors/{trackor_id}/assign_wp?workplan_template={workplan_template}".format(
+				website=self.URL, 
+				trackor_id=trackorId,
+				workplan_template=workplanTemplate
+				)
+
+		if name is not None:
+			URL += "&"+URLEncode(name)
+			
+		if startDate is not None:
+			if isinstance(startDate, (datetime.datetime,datetime.date)):
+				dt = startDate.strftime('%Y-%m-%d')
+			else:
+				dt = str(startDate)
+			URL += "&"+URLEncode(dt)
+			
+		if finishDate is not None:
+			if isinstance(finishDate, (datetime.datetime,datetime.date)):
+				dt = finishDate.strftime('%Y-%m-%d')
+			else:
+				dt = str(finishDate)
+			URL += "&"+URLEncode(dt)
+
+		self.errors = []
+		self.jsonData = {}
+		self.OVCall = curl('POST',URL,auth=(self.userName,self.password))
+		if len(self.OVCall.errors) > 0:
+			self.errors.append(self.OVCall.errors)
+		self.jsonData = self.OVCall.jsonData
+
+
+	def GetFile(self, trackorId, fieldName):
+		""" Get a File from a particular Trackor record's particular Configured field
+
+			trackorID: the system ID for the particular Trackor record that this is being assigned to.
+			fieldName: should be the Configured Field Name, not the Label.			
+		"""
+
+		URL = "https://{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
+				Website=self.URL,
+				TrackorID=trackorId,
+				ConfigFieldName=fieldName
+				)
+		self.errors = []
+		self.jsonData = {}
+		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
+		if len(self.OVCall.errors) > 0:
+			self.errors.append(self.OVCall.errors)
+		self.jsonData = self.OVCall.jsonData
+
+
+	def UploadFile(self, trackorId, fieldName, fileName, newFileName=None):
+		""" Get a File from a particular Trackor record's particular Configured field
+
+			trackorID: the system ID for the particular Trackor record that this is being assigned to.
+			fieldName: should be the Configured Field Name, not the Label.
+			fileName: path and file name to file you want to upload
+			newFileName: Optional, rename file when uploading.
+		"""
+
+		URL = "https://{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
+				Website=self.URL,
+				TrackorID=trackorId,
+				ConfigFieldName=fieldName
+				)
+		if newFileName is not None:
+			URL += "?file_name="+URLEncode(newFileName)
+		else:
+			URL += "?file_name="+URLEncode(os.path.basename(fileName))
+
+		File = {'file': open(fileName, 'rb')}
+		self.errors = []
+		self.jsonData = {}
+		self.OVCall = curl('POST',URL,auth=(self.userName,self.password),files=File)
+		if len(self.OVCall.errors) > 0:
+			self.errors.append(self.OVCall.errors)
+		self.jsonData = self.OVCall.jsonData
+
+
+
+	#https://trackor.onevizion.com/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}?file_name={NewFileName}
+
 
 
 class WorkPlan(object):
@@ -412,6 +535,7 @@ class WorkPlan(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 		self.jsonData = self.OVCall.jsonData
+			
 
 
 class Task(object):
