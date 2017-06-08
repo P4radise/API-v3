@@ -327,9 +327,6 @@ class Trackor(object):
 					TrackorID=trackorId
 					)
 
-		print URL
-		print JSON
-		#payload = open('temp_payload.json','rb')
 		Headers = {'content-type': 'application/x-www-form-urlencoded'}
 		if charset != "":
 			Headers['charset'] = charset
@@ -385,7 +382,7 @@ class Trackor(object):
 		JSON = json.dumps(JSONObj)
 
 		URL = "https://%s/api/v3/trackor_types/%s/trackors" % (self.URL, self.TrackorType)
-		#payload = open('temp_payload.json','rb')
+
 		Headers = {'content-type': 'application/json'}
 		if charset != "":
 			Headers['charset'] = charset
