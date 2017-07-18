@@ -41,6 +41,8 @@ class curl(object):
 		self.jsonData = {}
 		self.args = {}
 		self.duration = None
+		self.sentUrl = None
+		self.sentArgs = None
 		for key, value in kwargs.items():
 			self.args[key] = value
 			setattr(self, key, value)
@@ -72,6 +74,8 @@ class curl(object):
 
 		self.errors = []
 		self.jsonData = {}
+		self.sentUrl = self.url
+		self.sentArgs = self.args
 		before = datetime.datetime.utcnow()
 		try:
 			self.request = requests.request(self.method, self.url, **self.args)
@@ -954,7 +958,10 @@ class EMail(object):
 
 		for key,value in self.info.items():
 			body = body + "\n\n" + key + ":"
-			svalue = str(value)
+			if isinstance(value, basestring):
+				svalue = value.encode('ascii', 'ignore')
+			else:
+				svalue = str(value)
 			if "\n" in svalue:
 				body = body + "\n" + svalue
 			else:
