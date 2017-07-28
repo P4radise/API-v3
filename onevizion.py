@@ -847,7 +847,7 @@ class Export(object):
 			self.URL,
 			PID
 			)
-		print self.ImportURL
+
 		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
 		self.request = self.OVCall.request
 		self.jsonData = self.OVCall.jsonData
