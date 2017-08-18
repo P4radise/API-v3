@@ -6,6 +6,23 @@ import os
 import datetime
 from collections import OrderedDict
 
+Config = {
+	"Verbosity":0,
+	"ParameterFile":None,
+	"ParameterData":{},
+	"SMTPToken":None,
+	"Trace":OrderedDict(),
+	"Error":False
+	}
+
+def Message(Msg,Level=0):
+	"""Prints a message depending on the verbosity level set on the command line"""
+	if Level <= Config["Verbosity"]:
+		print Msg
+
+def TraceMessage(Msg,Level=0,TraceTag=""):
+	Message(Msg,Level)
+	Config["Trace"][TraceTag]=Msg
 
 class curl(object):
 	"""Wrapper for requests.request() that will handle Error trapping and try to give JSON for calling.
@@ -94,6 +111,8 @@ class curl(object):
 
 
 
+
+
 class OVImport(object):
 	"""Wrapper for calling FireTrackor Imports.  We have the
 	following properties:
@@ -114,7 +133,7 @@ class OVImport(object):
 		processId: the system processId returned from the API call
 	"""
 
-	def __init__(self, URL=None, userName=None, password=None, impSpecId=None, file=None, action='INSERT_UPDATE', comments=None, incremental=None):
+	def __init__(self, URL=None, userName=None, password=None, impSpecId=None, file=None, action='INSERT_UPDATE', comments=None, incremental=None, paramToken=None):
 		self.URL = URL
 		self.userName = userName
 		self.password = password
@@ -127,6 +146,14 @@ class OVImport(object):
 		self.request = {}
 		self.jsonData = {}
 		self.processId = None
+
+		if paramToken is not None:
+			if self.URL == "":
+				self.URL = Config["ParameterData"][paramToken]['url']
+			if self.userName == "":
+				self.userName = Config["ParameterData"][paramToken]['UserName']
+			if self.password == "":
+				self.password = Config["ParameterData"][paramToken]['Password']
 
 		# If all info is filled out, go ahead and run the query.
 		if URL != None and userName != None and password != None and impSpecId != None and file != None:
@@ -168,7 +195,7 @@ class Trackor(object):
 		jsonData: the json data converted to python array
 	"""
 
-	def __init__(self, trackorType = "", URL = "", userName="", password=""):
+	def __init__(self, trackorType = "", URL = "", userName="", password="", paramToken=None):
 		self.TrackorType = trackorType
 		self.URL = URL
 		self.userName = userName
@@ -177,6 +204,14 @@ class Trackor(object):
 		self.jsonData = {}
 		self.OVCall = curl()
 		self.request = None
+
+		if paramToken is not None:
+			if self.URL == "":
+				self.URL = Config["ParameterData"][paramToken]['url']
+			if self.userName == "":
+				self.userName = Config["ParameterData"][paramToken]['UserName']
+			if self.password == "":
+				self.password = Config["ParameterData"][paramToken]['Password']
 
 
 
@@ -189,10 +224,21 @@ class Trackor(object):
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('DELETE',URL,auth=(self.userName,self.password))
+		Message(URL,2)
+		Message("Deletes completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] =  URL
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
+
+
+
 
 	def read(self, 
 		trackorId=None, 
@@ -266,9 +312,24 @@ class Trackor(object):
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl(Method,URL,auth=(self.userName,self.password),**SearchBody)
+		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(URL,2)
+		Message(json.dumps(SearchBody,indent=2),2)
+		Message("{TrackorType} read completed in {Duration} seconds.".format(
+			TrackorType=self.TrackorType,
+			Duration=self.OVCall.duration
+			),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
-		self.jsonData = self.OVCall.jsonData
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(SearchBody,indent=2) 			
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 
 
 	def update(self, trackorId=None, filters={}, fields={}, parents={}, charset=""):
@@ -337,9 +398,24 @@ class Trackor(object):
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('PUT',URL, data=JSON, headers=Headers, auth=(self.userName,self.password))
+		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(URL,2)
+		Message(json.dumps(data,indent=2),2)
+		Message("{TrackorType} update completed in {Duration} seconds.".format(
+			TrackorType=self.TrackorType,
+			Duration=self.OVCall.duration
+			),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
-		self.jsonData = self.OVCall.jsonData
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(data,indent=2) 			
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 
 
 	def create(self,fields={},parents={}, charset=""):
@@ -393,9 +469,25 @@ class Trackor(object):
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('POST',URL, data=JSON, headers=Headers, auth=(self.userName,self.password))
+		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(URL,2)
+		Message(json.dumps(data,indent=2),2)
+		Message("{TrackorType} create completed in {Duration} seconds.".format(
+			TrackorType=self.TrackorType,
+			Duration=self.OVCall.duration
+			),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
-		self.jsonData = self.OVCall.jsonData
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(data,indent=2) 			
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
+
 
 	def assignWorkplan(self,trackorId, workplanTemplate, name=None, startDate=None, finishDate=None):
 		""" Assign a Workplan to a given Trackor Record.
@@ -433,9 +525,22 @@ class Trackor(object):
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('POST',URL,auth=(self.userName,self.password))
+		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(URL,2)
+		Message("{TrackorType} assign workplan completed in {Duration} seconds.".format(
+			TrackorType=self.TrackorType,
+			Duration=self.OVCall.duration
+			),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
-		self.jsonData = self.OVCall.jsonData
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = URL 
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 
 
 	def GetFile(self, trackorId, fieldName):
@@ -453,9 +558,22 @@ class Trackor(object):
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
+		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(URL,2)
+		Message("{TrackorType} get file completed in {Duration} seconds.".format(
+			TrackorType=self.TrackorType,
+			Duration=self.OVCall.duration
+			),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
-		self.jsonData = self.OVCall.jsonData
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = URL 
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 
 
 	def UploadFile(self, trackorId, fieldName, fileName, newFileName=None):
@@ -481,9 +599,24 @@ class Trackor(object):
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('POST',URL,auth=(self.userName,self.password),files=File)
+		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(URL,2)
+		Message("FileName: {FileName}".format(FileName=fileName),2)
+		Message("{TrackorType} upload file completed in {Duration} seconds.".format(
+			TrackorType=self.TrackorType,
+			Duration=self.OVCall.duration
+			),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
-		self.jsonData = self.OVCall.jsonData
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-FileName"] = fileName 			
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 
 
 
@@ -505,13 +638,20 @@ class WorkPlan(object):
 		jsonData: the json data converted to python array
 	"""
 
-	def __init__(self, URL = "", userName="", password=""):
+	def __init__(self, URL = "", userName="", password="", paramToken=None):
 		self.URL = URL
 		self.userName = userName
 		self.password = password
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl()
+		if paramToken is not None:
+			if self.URL == "":
+				self.URL = Config["ParameterData"][paramToken]['url']
+			if self.userName == "":
+				self.userName = Config["ParameterData"][paramToken]['UserName']
+			if self.password == "":
+				self.password = Config["ParameterData"][paramToken]['Password']
 
 	def read(self, workplanId = None, workplanTemplate = "", trackorType = "", trackorId = None):
 		""" Retrieve some data about a particular WorkPlan.WorkPlan must be 
@@ -533,21 +673,38 @@ class WorkPlan(object):
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
+		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(URL,2)
+		Message("Workplan read completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
-		self.jsonData = self.OVCall.jsonData
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = URL 
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 			
 
 
 class Task(object):
 
-	def __init__(self, URL = "", userName="", password=""):
+	def __init__(self, URL = "", userName="", password="", paramToken=None):
 		self.URL = URL
 		self.userName = userName
 		self.password = password
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl()
+		if paramToken is not None:
+			if self.URL == "":
+				self.URL = Config["ParameterData"][paramToken]['url']
+			if self.userName == "":
+				self.userName = Config["ParameterData"][paramToken]['UserName']
+			if self.password == "":
+				self.password = Config["ParameterData"][paramToken]['Password']
 
 	def read(self, taskId = None, workplanId=None, orderNumber=None):
 		""" Retrieve some data about a particular WorkPlan Tasks. Tasks must be 
@@ -563,9 +720,19 @@ class Task(object):
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
+		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(URL,2)
+		Message("Task read completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
-		self.jsonData = self.OVCall.jsonData
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = URL 
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 
 
 	def update(self, taskId, fields={}, dynamicDates=[]):
@@ -581,9 +748,21 @@ class Task(object):
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('PUT',URL, data=JSON, headers=Headers, auth=(self.userName,self.password))
+		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(URL,2)
+		Message(json.dumps(data,indent=2),2)
+		Message("Task update completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
-		self.jsonData = self.OVCall.jsonData
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(data,indent=2) 			
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 
 
 class Import(object):
@@ -597,7 +776,8 @@ class Import(object):
 		file=None, 
 		action='INSERT_UPDATE', 
 		comments=None, 
-		incremental=None
+		incremental=None, 
+		paramToken=None
 		):
 		self.URL = URL
 		self.userName = userName
@@ -614,6 +794,13 @@ class Import(object):
 		self.processId = None
 		self.status = None
 		self.processList = []
+		if paramToken is not None:
+			if self.URL == "":
+				self.URL = Config["ParameterData"][paramToken]['url']
+			if self.userName == "":
+				self.userName = Config["ParameterData"][paramToken]['UserName']
+			if self.password == "":
+				self.password = Config["ParameterData"][paramToken]['Password']
 
 		# If all info is filled out, go ahead and run the query.
 		if URL != None and userName != None and password != None and impSpecId != None and file != None:
@@ -631,18 +818,37 @@ class Import(object):
 			self.ImportURL += '&is_incremental=' + str(self.incremental)
 		self.ImportFile = {'file': open(self.file,'rb')}
 		self.OVCall = curl('POST',self.ImportURL,files=self.ImportFile,auth=(self.userName,self.password))
-		self.request = self.OVCall.request
 		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(URL,2)
+		Message("FileName: {FileName}".format(file),2)
+		Message("Import Send completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
+		TraceTag="{TimeStamp}:{FileName}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'),FileName=file)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
+			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-FileName"] = file
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 		else:
 			if "error_message" in self.jsonData and len(self.jsonData["error_message"]) > 0:
 				self.errors.append(self.jsonData["error_message"])
+				Config["Trace"][TraceTag+"-URL"] = URL 
+				Config["Trace"][TraceTag+"-FileName"] = file
+				TraceMessage("Eror Message: {Error}".format(Error=self.jsonData["error_message"]),0,TraceTag+"-ErrorMessage")
+				Config["Error"]=True
 			if "warnings" in self.jsonData and len(self.jsonData["warnings"]) > 0:
 				self.warnings.extend(self.jsonData["warnings"])
+				Config["Trace"][TraceTag+"-URL"] = URL 
+				Config["Trace"][TraceTag+"-FileName"] = file
+				TraceMessage("Eror Message: {Error}".format(Error=self.jsonData["warnings"]),0,TraceTag+"-Warnings")
 			if "process_id" in self.jsonData:
 				self.processId = self.jsonData["process_id"]
 				self.status = self.jsonData["status"]
+				Message("Success!  ProcessID: {ProcID}".format(ProcID=self.processId),1)
 
 	def interrupt(self,ProcessID=None):
 		if ProcessID is None:
@@ -654,12 +860,23 @@ class Import(object):
 			PID
 			)
 		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
+		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(URL,2)
+		Message("Interupt Process completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = URL 
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 		else:
 			self.processId = PID
-		self.request = self.OVCall.request
-		self.jsonData = self.OVCall.jsonData
+			Message("Successful Interrupt  ProcessID: {ProcID}".format(ProcID=self.processId),1)
+
 		if "status" in self.jsonData:
 			self.status = self.jsonData['status']
 
@@ -699,16 +916,27 @@ class Import(object):
 				self.ImportURL += "/"+str(processId)
 
 		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
+		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(URL,2)
+		Message(json.dumps(data,indent=2),2)
+		Message("Get Process Data completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
-		else:
-			pass
-		self.request = self.OVCall.request
-		self.jsonData = self.OVCall.jsonData
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(data,indent=2) 			
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 		if "status" in self.jsonData:
 			self.status = self.jsonData['status']
 		else:
 			self.status = 'No Status'
+		Message("Status: {Status}".format(Status=self.Status),1)
+
 		return self.jsonData
 
 
@@ -731,7 +959,8 @@ class Export(object):
 		viewOptions=None,
 		filterOptions=None,
 		fileFields=None,
-		comments=None
+		comments=None, 
+		paramToken=None
 		):
 		self.URL = URL
 		self.userName = userName
@@ -752,6 +981,13 @@ class Export(object):
 		self.processId = None
 		self.processList = []
 		self.content = None
+		if paramToken is not None:
+			if self.URL == "":
+				self.URL = Config["ParameterData"][paramToken]['url']
+			if self.userName == "":
+				self.userName = Config["ParameterData"][paramToken]['UserName']
+			if self.password == "":
+				self.password = Config["ParameterData"][paramToken]['Password']
 
 		# If all info is filled out, go ahead and run the query.
 		if URL is not None and userName is not None and password is not None and trackorType is not None and (viewOptions is not None or len(fields)>0 or fileFields is not None) and (filterOptions is not None or len(filters)>0):
@@ -895,10 +1131,17 @@ class EMail(object):
 		self.body = ""
 		self.files = []
 		self.duration = 0
+		if SMTP == {}:
+			if Config["SMTPToken"] is not None:
+				SMTP = Config["ParameterData"][Config["SMTPToken"]]
+				#self.parameterData(Config["ParameterData"][SMTP])
 		if 'UserName' in SMTP and 'Password' in SMTP and 'Server' in SMTP:
-			self.passwordData(SMTP)
+			self.parameterData(SMTP)
 
 	def passwordData(self,SMTP={}):
+		self.parameterData(SMTP)
+
+	def parameterData(self,SMTP={}):
 		"""This allows you to pass the SMTP type object from a PasswordData.  Should be a Dictionary.
 
 		Possible Attributes(Dictionary Keys) are:
@@ -943,7 +1186,7 @@ class EMail(object):
 		from optparse import OptionParser
 
 		from email import encoders
-		from email.message import Message
+		#from email.message import Message
 		from email.mime.audio import MIMEAudio
 		from email.mime.base import MIMEBase
 		from email.mime.image import MIMEImage
@@ -1005,8 +1248,12 @@ class EMail(object):
 
 
 		before = datetime.datetime.utcnow()
+		Message("Sending Email...",1)
+		Message("To: {ToList}".format(ToList=msg['To']),2)
+		Message("From: {From}".format(From=msg['From']),2)
+		Message("Subject: {Subject}".format(Subject=msg['Subject']),2)
+		Message("Body:\n{Body}".format(Body=self.body),2)
 
-		
 		if self.security.upper() in ['STARTTLS','TLS']:
 			send = smtplib.SMTP(self.server, int(self.port))
 			send.starttls()
@@ -1021,9 +1268,11 @@ class EMail(object):
 		after = datetime.datetime.utcnow()
 		delta = after - before
 		self.duration = delta.total_seconds()
+		Message("Sent Mail in {Duration} seconds.".format(Duration=self.duration),1)
 
 
-PasswordExample = """Password File required.  Example:
+
+ParameterExample = """Parameter File required.  Example:
 {
 	"SMTP": {
 		"UserName": "mgreene@onevizion.com",
@@ -1035,6 +1284,7 @@ PasswordExample = """Password File required.  Example:
 		"CC":['bbrown@xyz.com','eric.goete@xyz.com']
 	},
 	"trackor.onevizion.com": {
+		"url": "trackor.onevizion.com",
 		"UserName": "mgreene",
 		"Password": "YUGALWDGWGYD"
 	},
@@ -1047,29 +1297,41 @@ PasswordExample = """Password File required.  Example:
 	},
 }"""
 
+PasswordExample = ParameterExample
 
 
-def GetPasswords(passwordFile):
-	if not os.path.exists(passwordFile):
-		print PasswordExample
+def GetPasswords(passwordFile=None):
+	return GetParameters(passwordFile)
+
+def GetParameters(parameterFile=None):
+	if parameterFile is None:
+		parameterFile = Config["ParameterFile"]
+	if not os.path.exists(parameterFile):
+		print ParameterExample
 		quit()
 
-	with open(passwordFile,"rb") as PasswordFile:
-		PasswordData = json.load(PasswordFile)
-	return PasswordData
+	with open(parameterFile,"rb") as ParameterFile:
+		ParameterData = json.load(ParameterFile)
+	Config["ParameterData"] = ParameterData
+	Config["ParameterFile"] = parameterFile
+
+	return ParameterData
 
 def CheckPasswords(PasswordData,TokenName,KeyList, OptionalList=[]):
+	return CheckParameters(PasswordData,TokenName,KeyList, OptionalList)
+
+def CheckParameters(ParameterData,TokenName,KeyList, OptionalList=[]):
 	Missing = False
 	msg = ''
-	if TokenName not in PasswordData:
+	if TokenName not in ParameterData:
 		Missing = True
 	else:
 		for key in KeyList:
-			if key not in PasswordData[TokenName]:
+			if key not in ParameterData[TokenName]:
 				Missing = True
 				break
 	if Missing:
-		msg = "Passwords.json section required:\n"
+		msg = "Parameters.json section required:\n"
 		msg = msg + "\t'%s': {" % TokenName
 		for key in KeyList:
 			msg = msg + "\t\t'%s': 'xxxxxx',\n" % key
