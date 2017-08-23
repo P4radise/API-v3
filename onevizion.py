@@ -1385,7 +1385,7 @@ def JSONEndValue(objToEncode):
 		return str(objToEncode)
 
 def EFileEncode(FilePath,NewFileName=None):
-	if NewFileName is not None:
+	if NewFileName is None:
 		FileName = os.path.basename(FilePath)
 	else:
 		FileName = NewFileName
