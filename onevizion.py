@@ -1384,8 +1384,11 @@ def JSONEndValue(objToEncode):
 	else:
 		return str(objToEncode)
 
-def EFileEncode(FilePath):
-	FileName = os.path.basename(FilePath)
+def EFileEncode(FilePath,NewFileName=None):
+	if NewFileName is not None:
+		FileName = os.path.basename(FilePath)
+	else:
+		FileName = NewFileName
 	File={"file_name": FileName}
 	with open(FilePath,"rb") as f:
 		EncodedFile = base64.b64encode(f.read())
