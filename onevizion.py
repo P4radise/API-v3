@@ -4,6 +4,7 @@ import json
 import smtplib
 import os
 import datetime
+import base64
 from collections import OrderedDict
 
 Config = {
@@ -373,7 +374,6 @@ class Trackor(object):
 		if len(ParentsSection) > 0:
 			JSONObj["parents"] = ParentsSection
 		JSON = json.dumps(JSONObj)
-		print JSON
 
 		# Build up the filter to find the unique Tackor instance
 		if trackorId is None:
@@ -402,7 +402,7 @@ class Trackor(object):
 		self.request = self.OVCall.request
 
 		Message(URL,2)
-		Message(json.dumps(data,indent=2),2)
+		Message(json.dumps(JSONObj,indent=2),2)
 		Message("{TrackorType} update completed in {Duration} seconds.".format(
 			TrackorType=self.TrackorType,
 			Duration=self.OVCall.duration
@@ -411,7 +411,7 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(data,indent=2) 			
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2) 			
 			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
@@ -473,7 +473,7 @@ class Trackor(object):
 		self.request = self.OVCall.request
 
 		Message(URL,2)
-		Message(json.dumps(data,indent=2),2)
+		Message(json.dumps(JSONObj,indent=2),2)
 		Message("{TrackorType} create completed in {Duration} seconds.".format(
 			TrackorType=self.TrackorType,
 			Duration=self.OVCall.duration
@@ -482,7 +482,7 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(data,indent=2) 			
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2) 			
 			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
@@ -752,13 +752,13 @@ class Task(object):
 		self.request = self.OVCall.request
 
 		Message(URL,2)
-		Message(json.dumps(data,indent=2),2)
+		Message(json.dumps(fields,indent=2),2)
 		Message("Task update completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(data,indent=2) 			
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(fields,indent=2) 			
 			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
@@ -1374,7 +1374,7 @@ def JSONValue(strToEncode):
 
 def JSONEndValue(objToEncode):
 	if objToEncode is None:
-		return 'null'
+		return None
 	elif isinstance(objToEncode, (int, float)):
 		return objToEncode
 	elif isinstance(objToEncode, datetime.datetime):
@@ -1383,6 +1383,15 @@ def JSONEndValue(objToEncode):
 		return objToEncode.strftime('%Y-%m-%d')
 	else:
 		return str(objToEncode)
+
+def EFileEncode(FilePath):
+	FileName = os.path.basename(FilePath)
+	File={"file_name": FileName}
+	with open(FilePath,"rb") as f:
+		EncodedFile = base64.b64encode(f.read())
+	File["data"]=EncodedFile
+
+	return File
 
 
 
