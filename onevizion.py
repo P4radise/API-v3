@@ -326,7 +326,7 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(SearchBody,indent=2) 			
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(SearchBody,indent=2)			 
 			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
@@ -411,7 +411,7 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2) 			
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2)			
 			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
@@ -482,7 +482,7 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2) 			
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2)			
 			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
@@ -547,7 +547,7 @@ class Trackor(object):
 		""" Get a File from a particular Trackor record's particular Configured field
 
 			trackorID: the system ID for the particular Trackor record that this is being assigned to.
-			fieldName: should be the Configured Field Name, not the Label.			
+			fieldName: should be the Configured Field Name, not the Label.		  
 		"""
 
 		URL = "https://{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
@@ -612,7 +612,7 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-FileName"] = fileName 			
+			Config["Trace"][TraceTag+"-FileName"] = fileName			
 			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
@@ -758,7 +758,7 @@ class Task(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(fields,indent=2) 			
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(fields,indent=2)			 
 			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
@@ -821,14 +821,14 @@ class Import(object):
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
-		Message(URL,2)
-		Message("FileName: {FileName}".format(file),2)
+		Message(self.ImportURL,2)
+		Message("FileName: {FileName}".format(FileName=self.ImportFile),2)
 		Message("Import Send completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		TraceTag="{TimeStamp}:{FileName}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'),FileName=file)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
-			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-FileName"] = file
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+			Config["Trace"][TraceTag+"-FileName"] = self.ImportFile
 			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
@@ -836,14 +836,14 @@ class Import(object):
 		else:
 			if "error_message" in self.jsonData and len(self.jsonData["error_message"]) > 0:
 				self.errors.append(self.jsonData["error_message"])
-				Config["Trace"][TraceTag+"-URL"] = URL 
-				Config["Trace"][TraceTag+"-FileName"] = file
+				Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+				Config["Trace"][TraceTag+"-FileName"] = self.ImportFile
 				TraceMessage("Eror Message: {Error}".format(Error=self.jsonData["error_message"]),0,TraceTag+"-ErrorMessage")
 				Config["Error"]=True
 			if "warnings" in self.jsonData and len(self.jsonData["warnings"]) > 0:
 				self.warnings.extend(self.jsonData["warnings"])
-				Config["Trace"][TraceTag+"-URL"] = URL 
-				Config["Trace"][TraceTag+"-FileName"] = file
+				Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+				Config["Trace"][TraceTag+"-FileName"] = self.ImportFile
 				TraceMessage("Eror Message: {Error}".format(Error=self.jsonData["warnings"]),0,TraceTag+"-Warnings")
 			if "process_id" in self.jsonData:
 				self.processId = self.jsonData["process_id"]
@@ -863,12 +863,12 @@ class Import(object):
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
-		Message(URL,2)
+		Message(self.ImportURL,2)
 		Message("Interupt Process completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
-			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
 			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
@@ -919,14 +919,12 @@ class Import(object):
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
-		Message(URL,2)
-		Message(json.dumps(data,indent=2),2)
+		Message(self.ImportURL,2)
 		Message("Get Process Data completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
-			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(data,indent=2) 			
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
 			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
@@ -1020,10 +1018,19 @@ class Export(object):
 		if self.comments is not None:
 			self.ImportURL += '&comments=' + URLEncode(self.comments)
 		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
-		self.request = self.OVCall.request
 		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(self.ImportURL,2)
+		Message("Run Export completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 		else:
 			if "error_message" in self.jsonData and len(self.jsonData["error_message"]) > 0:
 				self.errors.append(self.jsonData["error_message"])
@@ -1045,12 +1052,21 @@ class Export(object):
 			PID
 			)
 		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
+		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(self.ImportURL,2)
+		Message("Get Interupt Export completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 		else:
 			self.processId = PID
-		self.request = self.OVCall.request
-		self.jsonData = self.OVCall.jsonData
 		if "status" in self.jsonData:
 			self.status = self.jsonData['status']
 
@@ -1064,10 +1080,19 @@ class Export(object):
 			PID
 			)
 		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
-		self.request = self.OVCall.request
 		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(self.ImportURL,2)
+		Message("Get Process Status for Export completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 		if "status" in self.jsonData:
 			self.status = self.jsonData['status']
 		else:
@@ -1085,10 +1110,19 @@ class Export(object):
 			)
 
 		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
-		self.request = self.OVCall.request
 		self.jsonData = self.OVCall.jsonData
+		self.request = self.OVCall.request
+
+		Message(self.ImportURL,2)
+		Message("Get File for Export completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+			Config["Error"]=True
 		else:
 			self.content = self.request.content
 		return self.content
