@@ -231,9 +231,12 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] =  URL
-			TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
@@ -327,18 +330,12 @@ class Trackor(object):
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(SearchBody,indent=2)			 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 
 
@@ -421,18 +418,12 @@ class Trackor(object):
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2)
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 
 
@@ -501,18 +492,12 @@ class Trackor(object):
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2)			
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 
 
@@ -606,18 +591,12 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 
 
@@ -658,18 +637,12 @@ class Trackor(object):
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			Config["Trace"][TraceTag+"-FileName"] = fileName			
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 
 
@@ -736,18 +709,12 @@ class WorkPlan(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 			
 
@@ -792,18 +759,12 @@ class Task(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 
 
@@ -831,18 +792,12 @@ class Task(object):
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(fields,indent=2)			 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 
 
@@ -910,18 +865,12 @@ class Import(object):
 			self.errors.append(self.OVCall.errors)
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
 			Config["Trace"][TraceTag+"-FileName"] = self.ImportFile
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 		else:
 			if "error_message" in self.jsonData and len(self.jsonData["error_message"]) > 0:
@@ -959,18 +908,12 @@ class Import(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 		else:
 			self.processId = PID
@@ -1024,18 +967,12 @@ class Import(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 		if "status" in self.jsonData:
 			self.status = self.jsonData['status']
@@ -1135,18 +1072,12 @@ class Export(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 		else:
 			if "error_message" in self.jsonData and len(self.jsonData["error_message"]) > 0:
@@ -1178,18 +1109,12 @@ class Export(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 		else:
 			self.processId = PID
@@ -1215,18 +1140,12 @@ class Export(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 		if "status" in self.jsonData:
 			self.status = self.jsonData['status']
@@ -1254,18 +1173,12 @@ class Export(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-			except Exception as e:
-				pass
-			try:
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				pass
+            try:
+                TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
+                TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
+                TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+            except Exception as e:
+                TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Body")
 			Config["Error"]=True
 		else:
 			self.content = self.request.content
