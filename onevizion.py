@@ -237,7 +237,7 @@ class Trackor(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
@@ -337,7 +337,7 @@ class Trackor(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 
 
@@ -426,7 +426,7 @@ class Trackor(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 
 
@@ -501,7 +501,7 @@ class Trackor(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 
 
@@ -559,7 +559,7 @@ class Trackor(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 
 
@@ -596,7 +596,7 @@ class Trackor(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 
 
@@ -643,7 +643,7 @@ class Trackor(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 
 
@@ -716,7 +716,7 @@ class WorkPlan(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 			
 
@@ -767,7 +767,7 @@ class Task(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 
 
@@ -801,7 +801,7 @@ class Task(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 
 
@@ -875,7 +875,7 @@ class Import(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 		else:
 			if "error_message" in self.jsonData and len(self.jsonData["error_message"]) > 0:
@@ -919,7 +919,7 @@ class Import(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 		else:
 			self.processId = PID
@@ -979,7 +979,7 @@ class Import(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 		if "status" in self.jsonData:
 			self.status = self.jsonData['status']
@@ -1085,7 +1085,7 @@ class Export(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 		else:
 			if "error_message" in self.jsonData and len(self.jsonData["error_message"]) > 0:
@@ -1123,7 +1123,7 @@ class Export(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 		else:
 			self.processId = PID
@@ -1155,7 +1155,7 @@ class Export(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 		if "status" in self.jsonData:
 			self.status = self.jsonData['status']
@@ -1188,7 +1188,7 @@ class Export(object):
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
 				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Erros}".format(Body=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
 		else:
 			self.content = self.request.content
