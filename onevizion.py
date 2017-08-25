@@ -230,6 +230,7 @@ class Trackor(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] =  URL
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
@@ -328,6 +329,7 @@ class Trackor(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(SearchBody,indent=2)			 
 			try:
@@ -416,6 +418,7 @@ class Trackor(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2)
 			try:
@@ -490,6 +493,7 @@ class Trackor(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2)			
 			try:
@@ -548,6 +552,7 @@ class Trackor(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
@@ -584,6 +589,7 @@ class Trackor(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
@@ -629,6 +635,7 @@ class Trackor(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			Config["Trace"][TraceTag+"-FileName"] = fileName			
 			try:
@@ -702,6 +709,7 @@ class WorkPlan(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
@@ -752,6 +760,7 @@ class Task(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
@@ -784,6 +793,7 @@ class Task(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = URL 
 			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(fields,indent=2)			 
 			try:
@@ -855,6 +865,7 @@ class Import(object):
 		Message("FileName: {FileName}".format(FileName=self.ImportFile),2)
 		Message("Import Send completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		TraceTag="{TimeStamp}:{FileName}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'),FileName=file)
+		self.TraceTag = TraceTag
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
@@ -901,6 +912,7 @@ class Import(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
@@ -960,6 +972,7 @@ class Import(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
@@ -1065,6 +1078,7 @@ class Export(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
@@ -1102,6 +1116,7 @@ class Export(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
@@ -1133,6 +1148,7 @@ class Export(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
