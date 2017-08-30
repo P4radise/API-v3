@@ -616,10 +616,10 @@ class Trackor(object):
 				)
 		if newFileName is not None:
 			URL += "?file_name="+URLEncode(newFileName)
-            File = {(newFileName,'file': open(fileName, 'rb'))}
+			File = {'file': (newFileName, open(fileName, 'rb'))}
 		else:
 			URL += "?file_name="+URLEncode(os.path.basename(fileName))
-            File = {(fileName,'file': open(fileName, 'rb'))}
+			File = {'file': (fileName, open(fileName, 'rb'))}
 
 		self.errors = []
 		self.jsonData = {}
