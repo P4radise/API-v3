@@ -616,10 +616,11 @@ class Trackor(object):
 				)
 		if newFileName is not None:
 			URL += "?file_name="+URLEncode(newFileName)
+            File = {(newFileName,'file': open(fileName, 'rb'))}
 		else:
 			URL += "?file_name="+URLEncode(os.path.basename(fileName))
+            File = {(fileName,'file': open(fileName, 'rb'))}
 
-		File = {'file': open(fileName, 'rb')}
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('POST',URL,auth=(self.userName,self.password),files=File)
@@ -856,7 +857,7 @@ class Import(object):
 			self.ImportURL += '&comments=' + URLEncode(self.comments)
 		if self.incremental is not None:
 			self.ImportURL += '&is_incremental=' + str(self.incremental)
-		self.ImportFile = {'file': open(self.file,'rb')}
+		self.ImportFile = {'file': (self.file, open(self.file,'rb'))}
 		self.OVCall = curl('POST',self.ImportURL,files=self.ImportFile,auth=(self.userName,self.password))
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
@@ -985,7 +986,7 @@ class Import(object):
 			self.status = self.jsonData['status']
 		else:
 			self.status = 'No Status'
-		Message("Status: {Status}".format(Status=self.Status),1)
+		Message("Status: {Status}".format(Status=self.status),1)
 
 		return self.jsonData
 
