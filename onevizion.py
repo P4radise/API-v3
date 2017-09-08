@@ -171,6 +171,15 @@ class OVImport(object):
 		self.curl = curl('POST',self.ImportURL,files=self.ImportFile,data=self.ImportParameters,auth=(self.userName,self.password))
 		if len(self.curl.errors) > 0:
 			self.errors.append(self.curl.errors)
+			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+			self.TraceTag = TraceTag
+			try:
+				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.curl.request.status_code),0,TraceTag+"-StatusCode")
+				TraceMessage("Reason: {Reason}".format(Reason=self.curl.request.reason),0,TraceTag+"-Reason")
+				TraceMessage("Body:\n{Body}".format(Body=self.curl.request.text),0,TraceTag+"-Body")
+			except Exception as e:
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.curl.errors,indent=2)),0,TraceTag+"-Errors")
+			Config["Error"]=True
 		elif "userMessages" in self.jsonData and len(self.jsonData["userMessages"]) > 0:
 			self.errors.append(self.jsonData["userMessages"])
 		else:
