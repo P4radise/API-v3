@@ -54,6 +54,8 @@ To implement this, we created a Config stucture so you can pass parameters to AL
 
 This Config structure is used for Messaging by setting the "Verbosity" item to a number. Vebosity = 0 gives only error messaging, Verbosity = 1 gives a little more information.  The higher the number, the more information, although, at teh time of this writing, 2 is the highest used.
 for example:
+```python
 onevizion.Config["Verbosity"] = 1
+```
 
 The Logging part is handled in onevizion.Config["Trace"].  Trace is an OrderedDict.  This can be used however you need to get a list of Messaging that hapened during the script's run.
