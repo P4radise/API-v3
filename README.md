@@ -11,58 +11,39 @@ All of our scripts use a Parameters.json file, which includes usernames and pass
 That file looks like this:
 
 {
-"MyInfo": {
-"email": "mgreene@onevizion.com",
-"name": "Mike Greene"
-},
-"dev-mtrac.mobilitie.com": {
-"url":"dev-mtrac.mobilitie.com",
-"UserName": "mgreene",
-"Password": “xxxxxxxxxx"
-},
-"mtrac.mobilitie.com": {
-"url":"mtrac.mobilitie.com",
-"UserName": "mgreene",
-"Password": “xxxxxxxx"
-},
-"trackor.onevizion.com": {
-"url":"trackor.onevizion.com",
-"UserName": "mgreene",
-"Password": “xxxxxxxxxxxx"
-},
-"Veracode": {
-"UserName": "mgreene@onevizion.com",
-"Password": “xxxxxxxxx"
-},
-"ReleaseSFTP": {
-"Host": "ftp.onevizion.com",
-"UserName": "releases",
-"Password": “xxxxxxxx"
-},
-"Folders": {
-"Archiva": "/opt/tomcat/data/repositories/releases",
-"Git": "/Users/mike/GitHub/IKAM/ov"
-},
-"SMTP_ESRI": {
-"UserName": "mgreene@onevizion.com",
-"Password": “xxxxxxxxxxxxx",
-"Server": "smtp.office365.com",
-"Port": "587",
-"Security": "STARTTLS",
-"To": "mgreene@onevizion.com"
-},
-"SMTP": {
-"UserName": "mgreene@onevizion.com",
-"Password": “xxxxxxxxxxxx",
-"Server": "smtp.office365.com",
-"Port": "587",
-"Security": "STARTTLS",
-"To": "mgreene@onevizion.com"
-},
-"AWSCredentials": {
-"AccessKey": “AOJBFJQEBFJQEFJEEJBFEJF",
-"SecretAccessKey”:”jlknf3kj4nr34rjnwj4nrwj4werwe"
-}
+	"trackor.onevizion.com": {
+		"url":"trackor.onevizion.com",
+		"UserName": "jsmith",
+		"Password": “xxxxxxxxxxxx"
+	},
+	"Veracode": {
+		"UserName": "jsmith@onevizion.com",
+		"Password": “xxxxxxxxx"
+	},
+	"Folders": {
+		"Archiva": "/opt/tomcat/data/repositories/releases",
+		"Git": "/Users/jsmith/GitHub/IKAM/ov"
+	},
+	"SMTP_ESRI": {
+		"UserName": "jsmith@onevizion.com",
+		"Password": “xxxxxxxxxxxxx",
+		"Server": "smtp.office365.com",
+		"Port": "587",
+		"Security": "STARTTLS",
+		"To": "jsmith@onevizion.com"
+	},
+	"SMTP": {
+		"UserName": "jsmith@onevizion.com",
+		"Password": “xxxxxxxxxxxx",
+		"Server": "smtp.office365.com",
+		"Port": "587",
+		"Security": "STARTTLS",
+		"To": "jsmith@onevizion.com"
+	},
+	"AWSCredentials": {
+		"AccessKey": “AOJBFJQEBFJQEFJEEJBFEJF",
+		"SecretAccessKey”:”jlknf3kj4nr34rjnwj4nrwj4werwe"
+	}
 }
 
 The idea is that you have a token, like “STMP” , or “trackor.onevizion.com”, and it has all the relavent  parameter info.
