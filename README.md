@@ -9,7 +9,7 @@ The Parameters.json file is not necessary, but we added in, since we use it for 
 All of our scripts use a Parameters.json file, which includes usernames and passwords along with URLs and other configuration.  This lets us test locally, then copy a script up unedited, to the production server or UAT server, and it will work correctly using parameters for that system.
 
 That file looks like this:
-
+```python
 {
 	"trackor.onevizion.com": {
 		"url":"trackor.onevizion.com",
@@ -45,7 +45,7 @@ That file looks like this:
 		"SecretAccessKey”:”jlknf3kj4nr34rjnwj4nrwj4werwe"
 	}
 }
-
+```
 The idea is that you have a token, like “STMP” , or “trackor.onevizion.com”, and it has all the relavent  parameter info.
 
 
