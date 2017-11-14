@@ -19,7 +19,7 @@ Config = {
 def Message(Msg,Level=0):
 	"""Prints a message depending on the verbosity level set on the command line"""
 	if Level <= Config["Verbosity"]:
-		print Msg
+		print (Msg)
 
 def TraceMessage(Msg,Level=0,TraceTag=""):
 	Message(Msg,Level)
@@ -1418,7 +1418,7 @@ def GetParameters(parameterFile=None):
 	if parameterFile is None:
 		parameterFile = Config["ParameterFile"]
 	if not os.path.exists(parameterFile):
-		print ParameterExample
+		print (ParameterExample)
 		quit()
 
 	with open(parameterFile,"rb") as ParameterFile:
