@@ -7,6 +7,8 @@ import datetime
 import base64
 from collections import OrderedDict
 
+__version__ = '1.0.0'
+
 Config = {
 	"Verbosity":0,
 	"ParameterFile":None,

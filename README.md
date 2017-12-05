@@ -3,6 +3,10 @@ Version 3 API for OneVizion
 
 This is a wrapper for simplifying API connection to a OneVizion system.
 
+Install with 
+
+pip install onevizion
+
 
 The Parameters.json file is not necessary, but we added in, since we use it for our scripts, and it keeps hardcoded logins and things our of a script.
 
