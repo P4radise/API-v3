@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: onevizion
-Version: 1.0.0
+Version: 1.0.2
 Summary: onevizion wraps the version 3 API for a OneVizion system, and provides a few optional other utilities.
 Home-page: https://github.com/Onevizion/API-v3
 Author: OneVizion
@@ -11,6 +11,10 @@ Description: # API-v3
         Version 3 API for OneVizion
         
         This is a wrapper for simplifying API connection to a OneVizion system.
+        
+        Install with 
+        
+        pip install onevizion
         
         
         The Parameters.json file is not necessary, but we added in, since we use it for our scripts, and it keeps hardcoded logins and things our of a script.
