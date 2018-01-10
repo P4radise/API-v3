@@ -3,13 +3,13 @@
 import os
 from setuptools import setup, find_packages
 #from onevizion import __version__
-__version__ = '1.0.6'
+__version__ = '1.0.7'
 
 #following PyPI guide: https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
 
 def read(*paths):
     """Build a file path from *paths* and return the contents."""
-    with open(os.path.join(*paths), 'r') as f:
+    with open(os.path.join(*paths), 'rb') as f:
         return f.read()
 
 setup(name='onevizion',
