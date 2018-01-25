@@ -18,11 +18,11 @@ That file looks like this:
 	"trackor.onevizion.com": {
 		"url":"trackor.onevizion.com",
 		"UserName": "jsmith",
-		"Password": “xxxxxxxxxxxx"
+		"Password": "xxxxxxxxxxxx"
 	},
 	"Veracode": {
 		"UserName": "jsmith@onevizion.com",
-		"Password": “xxxxxxxxx"
+		"Password": "xxxxxxxxx"
 	},
 	"Folders": {
 		"Archiva": "/opt/tomcat/data/repositories/releases",
@@ -30,7 +30,7 @@ That file looks like this:
 	},
 	"SMTP_ESRI": {
 		"UserName": "jsmith@onevizion.com",
-		"Password": “xxxxxxxxxxxxx",
+		"Password": "xxxxxxxxxxxxx",
 		"Server": "smtp.office365.com",
 		"Port": "587",
 		"Security": "STARTTLS",
@@ -38,19 +38,19 @@ That file looks like this:
 	},
 	"SMTP": {
 		"UserName": "jsmith@onevizion.com",
-		"Password": “xxxxxxxxxxxx",
+		"Password": "xxxxxxxxxxxx",
 		"Server": "smtp.office365.com",
 		"Port": "587",
 		"Security": "STARTTLS",
 		"To": "jsmith@onevizion.com"
 	},
 	"AWSCredentials": {
-		"AccessKey": “AOJBFJQEBFJQEFJEEJBFEJF",
-		"SecretAccessKey”:”jlknf3kj4nr34rjnwj4nrwj4werwe"
+		"AccessKey": "AOJBFJQEBFJQEFJEEJBFEJF",
+		"SecretAccessKey":"jlknf3kj4nr34rjnwj4nrwj4werwe"
 	}
 }
 ```
-The idea is that you have a token, like “STMP” , or “trackor.onevizion.com”, and it has all the relavent  parameter info.
+The idea is that you have a token, like "STMP" , or "trackor.onevizion.com", and it has all the relavent  parameter info.
 
 
 We tried to add some automatic Logging and Messaging for all API connections.  It is optional, but can cut down on lines of code if you want to use it.
