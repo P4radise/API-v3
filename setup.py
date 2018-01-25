@@ -3,14 +3,15 @@
 import os
 from setuptools import setup, find_packages
 #from onevizion import __version__
-__version__ = '1.0.8'
+__version__ = '1.0.9'
 
 #following PyPI guide: https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
 
 def read(*paths):
     """Build a file path from *paths* and return the contents."""
+    from io import open
     with open(os.path.join(*paths), 'rb') as f:
-        return f.read()
+        return bytes(f.read())
 
 ReadMeFileText = read('README.md')
 
@@ -31,6 +32,5 @@ setup(name='onevizion',
 
     platforms=["Unix"],
     license="MIT",
-    description="onevizion wraps the version 3 API for a OneVizion system, and provides a few optional other utilities.",
-    long_description=ReadMeFileText
+    description="onevizion wraps the version 3 API for a OneVizion system, and provides a few optional other utilities."
 )
