@@ -3,6 +3,8 @@ import urllib
 import json
 import smtplib
 import os
+import sys
+import fcntl
 import datetime
 import base64
 from collections import OrderedDict
@@ -41,6 +43,61 @@ def Message(Msg,Level=0):
 def TraceMessage(Msg,Level=0,TraceTag=""):
 	Message(Msg,Level)
 	Config["Trace"][TraceTag]=Msg
+
+class Singleton(object):
+    """ Make sure this process is only running once.  It does a quiet quit() if it's already running.
+    """
+	def __init__(self,LockFileName=None):
+        """ LockFileName can be specified, or if left blank, it will default to ScriptName.lck
+        """
+		self.initialized = False
+		if LockFileName is None:
+			import __main__
+			self.LockFileName = __main__.__file__[:-3]+".lck"
+		else:
+			self.LockFileName = LockFileName
+		# Make Sure this script is not still running from last time before we run
+		if sys.platform == 'win32':
+			try:
+				# file already exists, we try to remove (in case previous
+				# execution was interrupted)
+				if os.path.exists(self.LockFileName):
+					os.unlink(self.LockFileName)
+				self.LockFile = os.open(
+					self.LockFileName, os.O_CREAT | os.O_EXCL | os.O_RDWR)
+			except OSError:
+				type, e, tb = sys.exc_info()
+				if e.errno == 13:
+					Message("Process still running from previous. Quitting.")
+					quit()
+		else:  # non Windows
+			self.LockFile = open(self.LockFileName, 'w')
+			self.LockFile.flush()
+			try:
+				fcntl.lockf(self.LockFile, fcntl.LOCK_EX | fcntl.LOCK_NB)
+			except IOError:
+				Message("Process still running from previous. Quitting.")
+				quit()
+		self.initialized = True
+		
+	def __del__(self):
+		# Clean up File on Exit
+		if not self.initialized:
+			return
+		try:
+			if sys.platform == 'win32':
+				if hasattr(self, 'LockFile'):
+					os.close(self.LockFileName)
+					os.unlink(self.LockFileName)
+			else:
+				fcntl.lockf(self.LockFile, fcntl.LOCK_UN)
+				# os.close(self.fp)
+				if os.path.isfile(self.LockFileName):
+					os.unlink(self.LockFileName)
+		except Exception as e:
+			Message("Unknown error: %s" % e)
+			sys.exit(-1)
+
 
 class curl(object):
 	"""Wrapper for requests.request() that will handle Error trapping and try to give JSON for calling.
