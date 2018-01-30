@@ -45,11 +45,11 @@ def TraceMessage(Msg,Level=0,TraceTag=""):
 	Config["Trace"][TraceTag]=Msg
 
 class Singleton(object):
-    """ Make sure this process is only running once.  It does a quiet quit() if it's already running.
-    """
+	""" Make sure this process is only running once.  It does a quiet quit() if it's already running.
+	"""
 	def __init__(self,LockFileName=None):
-        """ LockFileName can be specified, or if left blank, it will default to ScriptName.lck
-        """
+		""" LockFileName can be specified, or if left blank, it will default to ScriptName.lck
+		"""
 		self.initialized = False
 		if LockFileName is None:
 			import __main__
