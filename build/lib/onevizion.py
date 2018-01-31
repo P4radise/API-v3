@@ -46,11 +46,40 @@ def TraceMessage(Msg,Level=0,TraceTag=""):
 
 class Singleton(object):
 	""" Make sure this process is only running once.  It does a quiet quit() if it's already running.
+		* May use any Lockfile name you like, default is ScriptName.lck.
+		* May choose what happens if a process collision happens
+			"silent" - exit with normal quit
+			"error" - exit with error signal
+			"none" - do nothing but set property to check, for custom things
+		* May set custom Quit Message.
+
+		This was mostly taken from the tendo library, releassed under the Python License allowing derivations
+		https://github.com/pycontribs/tendo/blob/master/tendo/singleton.py
+		My reason for creating this offshoot was because the tendo version forces any error code -1 exit,
+		which does not work for my purposes.
 	"""
-	def __init__(self,LockFileName=None):
-		""" LockFileName can be specified, or if left blank, it will default to ScriptName.lck
+	def __init__(self,LockFileName=None,QuitMode="silent",Msg="Previous process Still Running.  Quitting."):
+		""" LockFileName - can be specified, or if left blank, it will default to ScriptName.lck
+			QuitMode - determines how to respond to finding an already running process. Possible Options are:
+				"silent" - exit silently with no error code.
+				"error" - exit with error code -1
+				"none" - set property and continue running
+			Msg - Allows for a custom Message to be sent to console
 		"""
+		def Quit():
+			"""Handle Quitting (or not) as specified
+			"""
+			if Msg is not None and Msg != "":
+				Message(Msg)
+			self.foundProcess = True
+			if QuitMode.lower() == "silent":
+				quit()
+			elif QuitMode.lower() == "error":
+				sys.exit(-1)
+
 		self.initialized = False
+		self.foundProcess = False
+		# Choose Filename for Lock File
 		if LockFileName is None:
 			import __main__
 			self.LockFileName = __main__.__file__[:-3]+".lck"
@@ -68,16 +97,14 @@ class Singleton(object):
 			except OSError:
 				type, e, tb = sys.exc_info()
 				if e.errno == 13:
-					Message("Process still running from previous. Quitting.")
-					quit()
+					Quit()
 		else:  # non Windows
 			self.LockFile = open(self.LockFileName, 'w')
 			self.LockFile.flush()
 			try:
 				fcntl.lockf(self.LockFile, fcntl.LOCK_EX | fcntl.LOCK_NB)
 			except IOError:
-				Message("Process still running from previous. Quitting.")
-				quit()
+				Quit()
 		self.initialized = True
 		
 	def __del__(self):

@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: onevizion
-Version: 1.0.11
+Version: 1.0.12
 Summary: onevizion wraps the version 3 API for a OneVizion system, and provides a few optional other utilities.
 Home-page: https://github.com/Onevizion/API-v3
 Author: OneVizion
