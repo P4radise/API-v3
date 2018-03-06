@@ -946,15 +946,15 @@ class Import(object):
 		self.status = None
 		self.processList = []
 		if paramToken is not None:
-			if self.URL == "":
+			if self.URL is None:
 				self.URL = Config["ParameterData"][paramToken]['url']
-			if self.userName == "":
+			if self.userName is None:
 				self.userName = Config["ParameterData"][paramToken]['UserName']
-			if self.password == "":
+			if self.password is None:
 				self.password = Config["ParameterData"][paramToken]['Password']
 
 		# If all info is filled out, go ahead and run the query.
-		if URL != None and userName != None and password != None and impSpecId != None and file != None:
+		if self.URL != None and self.userName != None and self.password != None and self.impSpecId != None and self.file != None:
 			self.run()
 
 	def run(self):
@@ -1143,217 +1143,11 @@ class Export(object):
 		self.processList = []
 		self.content = None
 		if paramToken is not None:
-			if self.URL == "":
+			if self.URL is None:
 				self.URL = Config["ParameterData"][paramToken]['url']
-			if self.userName == "":
+			if self.userName is None:
 				self.userName = Config["ParameterData"][paramToken]['UserName']
-			if self.password == "":
-				self.password = Config["ParameterData"][paramToken]['Password']
-
-		# If all info is filled out, go ahead and run the query.
-		if URL is not None and userName is not None and password is not None and trackorType is not None and (viewOptions is not None or len(fields)>0 or fileFields is not None) and (filterOptions is not None or len(filters)>0):
-			self.run()
-
-	def run(self):
-		self.ImportURL = "https://%s/api/v3/exports/%s/run?export_mode=%s&delivery=%s"%(
-			self.URL,
-			self.trackorType,
-			self.exportMode,
-			self.delivery
-			)
-
-		ViewSection = ""
-		if self.viewOptions is None:
-			ViewSection = '&fields=' + ",".join(self.fields)
-		else:
-			ViewSection = '&view=' + URLEncode(self.viewOptions)
-		self.ImportURL += ViewSection
-
-		FilterSection = "&"
-		if self.filterOptions is None:
-			for key,value in self.filters.items():
-				FilterSection += key + '=' + URLEncode(str(value)) + '&'
-			FilterSection = FilterSection.rstrip('?&')
-		else:
-			FilterSection = "&filter="+URLEncode(self.filterOptions)
-		self.ImportURL += FilterSection
-
-		if self.comments is not None:
-			self.ImportURL += '&comments=' + URLEncode(self.comments)
-		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
-		self.jsonData = self.OVCall.jsonData
-		self.request = self.OVCall.request
-
-		Message(self.ImportURL,2)
-		Message("Run Export completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
-		if len(self.OVCall.errors) > 0:
-			self.errors.append(self.OVCall.errors)
-			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
-			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
-			Config["Error"]=True
-		else:
-			if "error_message" in self.jsonData and len(self.jsonData["error_message"]) > 0:
-				self.errors.append(self.jsonData["error_message"])
-			if "warnings" in self.jsonData and len(self.jsonData["warnings"]) > 0:
-				self.warnings.extend(self.jsonData["warnings"])
-			if "process_id" in self.jsonData:
-				self.processId = self.jsonData["process_id"]
-			if "status" in self.jsonData:
-				self.status = self.jsonData["status"]
-		return self.processId
-
-	def interrupt(self,ProcessID=None):
-		if ProcessID is None:
-			PID = self.processId
-		else:
-			PID = ProcessID
-		self.ImportURL = "https://%s/api/v3/exports/runs/%d/interrupt"%(
-			self.URL,
-			PID
-			)
-		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
-		self.jsonData = self.OVCall.jsonData
-		self.request = self.OVCall.request
-
-		Message(self.ImportURL,2)
-		Message("Get Interupt Export completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
-		if len(self.OVCall.errors) > 0:
-			self.errors.append(self.OVCall.errors)
-			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
-			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
-			Config["Error"]=True
-		else:
-			self.processId = PID
-		if "status" in self.jsonData:
-			self.status = self.jsonData['status']
-
-	def getProcessStatus(self,ProcessID=None):
-		if ProcessID is None:
-			PID = self.processId
-		else:
-			PID = ProcessID
-		self.ImportURL = "https://%s/api/v3/exports/runs/%d"%(
-			self.URL,
-			PID
-			)
-		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
-		self.jsonData = self.OVCall.jsonData
-		self.request = self.OVCall.request
-
-		Message(self.ImportURL,2)
-		Message("Get Process Status for Export completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
-		if len(self.OVCall.errors) > 0:
-			self.errors.append(self.OVCall.errors)
-			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
-			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
-			Config["Error"]=True
-		if "status" in self.jsonData:
-			self.status = self.jsonData['status']
-		else:
-			self.status = 'No Status'
-		return self.status
-
-	def getFile(self,ProcessID=None):
-		if ProcessID is None:
-			PID = self.processId
-		else:
-			PID = ProcessID
-		self.ImportURL = "https://%s/api/v3/exports/runs/%d/file"%(
-			self.URL,
-			PID
-			)
-
-		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
-		self.jsonData = self.OVCall.jsonData
-		self.request = self.OVCall.request
-
-		Message(self.ImportURL,2)
-		Message("Get File for Export completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
-		if len(self.OVCall.errors) > 0:
-			self.errors.append(self.OVCall.errors)
-			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
-			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
-			Config["Error"]=True
-		else:
-			self.content = self.request.content
-		return self.content
-
-
-
-
-
-
-
-class Export(object):
-
-	def __init__(
-		self, 
-		URL=None, 
-		userName=None, 
-		password=None, 
-		trackorType=None,
-		filters={},
-		fields=[],
-		exportMode="CSV",
-		delivery="File",
-		viewOptions=None,
-		filterOptions=None,
-		fileFields=None,
-		comments=None, 
-		paramToken=None
-		):
-		self.URL = URL
-		self.userName = userName
-		self.password = password
-		self.trackorType = trackorType
-		self.exportMode = exportMode
-		self.delivery = delivery
-		self.comments = comments
-		self.filters = filters
-		self.fields = fields
-		self.viewOptions = viewOptions
-		self.filterOptions = filterOptions
-		self.fileFields = fileFields
-		self.errors = []
-		self.request = {}
-		self.jsonData = {}
-		self.status = None
-		self.processId = None
-		self.processList = []
-		self.content = None
-		if paramToken is not None:
-			if self.URL == "":
-				self.URL = Config["ParameterData"][paramToken]['url']
-			if self.userName == "":
-				self.userName = Config["ParameterData"][paramToken]['UserName']
-			if self.password == "":
+			if self.password is None:
 				self.password = Config["ParameterData"][paramToken]['Password']
 
 		# If all info is filled out, go ahead and run the query.
