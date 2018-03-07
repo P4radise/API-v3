@@ -273,11 +273,11 @@ class OVImport(object):
 			comments=self.comments, 
 			incremental=self.incremental
 			)
-        self.errors = self.Import.curl.errors
-        if len(self.Import.curl.errors) == 0:
-            self.request = self.Import.request
-            self.jsonData = self.Import.jsonData
-            self.processId = self.Import.processId
+		self.errors = self.Import.errors
+		if len(self.Import.errors) == 0:
+			self.request = self.Import.request
+			self.jsonData = self.Import.jsonData
+			self.processId = self.Import.processId
 
 
 
