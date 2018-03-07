@@ -250,44 +250,34 @@ class OVImport(object):
 		self.processId = None
 
 		if paramToken is not None:
-			if self.URL == "":
+			if self.URL is None:
 				self.URL = Config["ParameterData"][paramToken]['url']
-			if self.userName == "":
+			if self.userName is None:
 				self.userName = Config["ParameterData"][paramToken]['UserName']
-			if self.password == "":
+			if self.password is None:
 				self.password = Config["ParameterData"][paramToken]['Password']
 
 		# If all info is filled out, go ahead and run the query.
-		if URL != None and userName != None and password != None and impSpecId != None and file != None:
+		if self.URL != None and self.userName != None and self.password != None and self.impSpecId != None and self.file != None:
 			self.makeCall()
 
 	def makeCall(self):
-		self.ImportURL = "https://" + self.URL + "/configimport/SubmitUrlImport.do"
-		self.ImportParameters = {'impSpecId': self.impSpecId,'action': self.action}
-		if self.comments is not None:
-			self.ImportParameters['comments'] = self.comments
-		if self.incremental is not None:
-			self.ImportParameters['isIncremental'] = self.incremental
-		self.ImportFile = {'file': open(self.file,'rb')}
-		self.curl = curl('POST',self.ImportURL,files=self.ImportFile,data=self.ImportParameters,auth=(self.userName,self.password))
-		if len(self.curl.errors) > 0:
-			self.errors.append(self.curl.errors)
-			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
-			self.TraceTag = TraceTag
-			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.curl.request.status_code),0,TraceTag+"-StatusCode")
-				TraceMessage("Reason: {Reason}".format(Reason=self.curl.request.reason),0,TraceTag+"-Reason")
-				TraceMessage("Body:\n{Body}".format(Body=self.curl.request.text),0,TraceTag+"-Body")
-			except Exception as e:
-				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.curl.errors,indent=2)),0,TraceTag+"-Errors")
-			Config["Error"]=True
-		elif "userMessages" in self.jsonData and len(self.jsonData["userMessages"]) > 0:
-			self.errors.append(self.jsonData["userMessages"])
-		else:
-			self.processId = self.curl.jsonData["processId"]
-		self.request = self.curl.request
-		self.jsonData = self.jsonData
 
+		self.Import = Import(
+			URL=self.URL, 
+			userName=self.userName, 
+			password=self.password, 
+			impSpecId=self.impSpecId, 
+			file=self.file, 
+			action=self.action, 
+			comments=self.comments, 
+			incremental=self.incremental
+			)
+        self.errors = self.Import.curl.errors
+        if len(self.Import.curl.errors) == 0:
+            self.request = self.Import.request
+            self.jsonData = self.Import.jsonData
+            self.processId = self.Import.processId
 
 
 
@@ -1151,7 +1141,7 @@ class Export(object):
 				self.password = Config["ParameterData"][paramToken]['Password']
 
 		# If all info is filled out, go ahead and run the query.
-		if URL is not None and userName is not None and password is not None and trackorType is not None and (viewOptions is not None or len(fields)>0 or fileFields is not None) and (filterOptions is not None or len(filters)>0):
+		if self.URL is not None and self.userName is not None and self.password is not None and self.trackorType is not None and (self.viewOptions is not None or len(self.fields)>0 or self.fileFields is not None) and (self.filterOptions is not None or len(self.filters)>0):
 			self.run()
 
 	def run(self):
