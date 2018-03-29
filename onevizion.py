@@ -4,7 +4,6 @@ import json
 import smtplib
 import os
 import sys
-import fcntl
 import datetime
 import base64
 from collections import OrderedDict
@@ -99,6 +98,7 @@ class Singleton(object):
 				if e.errno == 13:
 					Quit()
 		else:  # non Windows
+			import fcntl
 			self.LockFile = open(self.LockFileName, 'w')
 			self.LockFile.flush()
 			try:
@@ -117,6 +117,7 @@ class Singleton(object):
 					os.close(self.LockFileName)
 					os.unlink(self.LockFileName)
 			else:
+				import fcntl
 				fcntl.lockf(self.LockFile, fcntl.LOCK_UN)
 				# os.close(self.fp)
 				if os.path.isfile(self.LockFileName):
@@ -216,7 +217,7 @@ class curl(object):
 
 
 class OVImport(object):
-	"""Wrapper for calling FireTrackor Imports.  We have the
+	"""Wrapper for calling OneVizion Imports.  We have the
 	following properties:
 
 	Attributes:
@@ -282,7 +283,7 @@ class OVImport(object):
 
 
 class Trackor(object):
-	"""Wrapper for calling the FireTrackor API for Trackors.  You can Delete, Read, Update or Create new
+	"""Wrapper for calling the Onvizion API for Trackors.  You can Delete, Read, Update or Create new
 		Trackor instances with the like named methods.
 
 	Attributes:
@@ -321,7 +322,7 @@ class Trackor(object):
 		"""
 		FilterSection = "trackor_id=" + str(trackorId)
 
-		URL = "https://%s/api/v3/trackor_types/%s/trackors?%s" % (self.URL, self.TrackorType, FilterSection)
+		URL = "https://{URL}/api/v3/trackor_types/{TrackorType}/trackors?{FilterSection}".format(URL=self.URL, TrackorType=self.TrackorType, FilterSection=FilterSection)
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('DELETE',URL,auth=(self.userName,self.password))
@@ -573,7 +574,7 @@ class Trackor(object):
 			JSONObj["parents"] = ParentsSection
 		JSON = json.dumps(JSONObj)
 
-		URL = "https://%s/api/v3/trackor_types/%s/trackors" % (self.URL, self.TrackorType)
+		URL = "https://{URL}/api/v3/trackor_types/{TrackorType}/trackors".format(URL=self.URL, TrackorType=self.TrackorType)
 
 		Headers = {'content-type': 'application/json'}
 		if charset != "":
@@ -754,7 +755,7 @@ class Trackor(object):
 
 
 class WorkPlan(object):
-	"""Wrapper for calling the FireTrackor API for WorkPlans.  You can Read or Update 
+	"""Wrapper for calling the OneVizion API for WorkPlans.  You can Read or Update 
 		WorkPlan instances with the like named methods.
 
 	Attributes:
@@ -789,16 +790,16 @@ class WorkPlan(object):
 		FilterSection = ""
 		if workplanId is None:
 			#?wp_template=Augment%20Workplan&trackor_type=SAR&trackor_id=1234
-			FilterSection = "?wp_template=%s&trackor_type=%s&trackor_id=%d" % (
-				URLEncode(workplanTemplate),
-				URLEncode(trackorType),
-				trackorId
+			FilterSection = "?wp_template={WPTemplate}&trackor_type={TrackorType}&trackor_id={TrackorID}".format(
+				WPTemplate=URLEncode(workplanTemplate),
+				TrackorType=URLEncode(trackorType),
+				TrackorID=trackorId
 				)
 		else:
 			#1234
 			FilterSection = str(trackorId)
 
-		URL = "https://%s/api/v3/wps/%s" % (self.URL, FilterSection)
+		URL = "https://{URL}/api/v3/wps/{FilterSection}".format(URL=self.URL, FilterSection=FilterSection)
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
@@ -844,11 +845,11 @@ class Task(object):
 			identified either by workplanId, workplanId and orderNumber or by a taskId
 		"""
 		if taskId is not None:
-			URL = "https://%s/api/v3/tasks/%d" % (self.URL, taskId)
+			URL = "https://{URL}/api/v3/tasks/{TaskID}".format(URL=self.URL, TaskID=taskId)
 		elif orderNumber is not None:
-			URL = "https://%s/api/v3/tasks?workplan_id=%d&order_number=%d" % (self.URL, workplanId, orderNumber)
+			URL = "https://{URL}/api/v3/tasks?workplan_id={WorkPlanID}&order_number={OrderNumber}".format(URL=self.URL, WorkPlanID=workplanId, OrderNumber=orderNumber)
 		else:
-			URL = "https://%s/api/v3/wps/%d/tasks" % (self.URL, workplanId)
+			URL = "https://{URL}/api/v3/wps/{WorkPlanID}/tasks".format(URL=self.URL, WorkPlanID=workplanId)
 
 		self.errors = []
 		self.jsonData = {}
@@ -879,7 +880,7 @@ class Task(object):
 
 		JSON = json.dumps(fields)
 
-		URL = "https://%s/api/v3/tasks/%d" % (self.URL, taskId)
+		URL = "https://{URL}/api/v3/tasks/{TaskID}".format(URL=self.URL, TaskID=taskId)
 		#payload = open('temp_payload.json','rb')
 		Headers = {'content-type': 'application/x-www-form-urlencoded'}
 		self.errors = []
@@ -948,10 +949,10 @@ class Import(object):
 			self.run()
 
 	def run(self):
-		self.ImportURL = "https://%s/api/v3/imports/%d/run?action=%s"%(
-			self.URL,
-			self.impSpecId,
-			self.action
+		self.ImportURL = "https://{URL}/api/v3/imports/{ImpSpecID}/run?action={Action}".format(
+			URL=self.URL,
+			ImpSpecID=self.impSpecId,
+			Action=self.action
 			)
 		if self.comments is not None:
 			self.ImportURL += '&comments=' + URLEncode(self.comments)
@@ -1000,9 +1001,9 @@ class Import(object):
 			PID = self.processId
 		else:
 			PID = ProcessID
-		self.ImportURL = "https://%s/api/v3/imports/runs/%d/interrupt"%(
-			self.URL,
-			PID
+		self.ImportURL = "https://{URL}/api/v3/imports/runs/{ProcID}/interrupt".format(
+			URL=self.URL,
+			ProcID=PID
 			)
 		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
 		self.jsonData = self.OVCall.jsonData
@@ -1043,8 +1044,8 @@ class Import(object):
 					self.ImportURL += "&"
 				self.ImportURL += paramName + "=" +URLEncode(str(param))
 
-		self.ImportURL = "https://%s/api/v3/imports/runs"%(
-			self.URL
+		self.ImportURL = "https://{URL}/api/v3/imports/runs".format(
+			URL=self.URL
 			)
 		if status is not None or comments is not None or importName is not None or owner is not None or isPdf is not None:
 			self.ImportURL += "?"
@@ -1145,11 +1146,11 @@ class Export(object):
 			self.run()
 
 	def run(self):
-		self.ImportURL = "https://%s/api/v3/exports/%s/run?export_mode=%s&delivery=%s"%(
-			self.URL,
-			self.trackorType,
-			self.exportMode,
-			self.delivery
+		self.ImportURL = "https://{URL}/api/v3/exports/{TrackorType}/run?export_mode={ExportMode}&delivery={Delivery}".format(
+			URL=self.URL,
+			TrackorType=self.trackorType,
+			ExportMode=self.exportMode,
+			Delivery=self.delivery
 			)
 
 		ViewSection = ""
@@ -1204,9 +1205,9 @@ class Export(object):
 			PID = self.processId
 		else:
 			PID = ProcessID
-		self.ImportURL = "https://%s/api/v3/exports/runs/%d/interrupt"%(
-			self.URL,
-			PID
+		self.ImportURL = "https://{URL}/api/v3/exports/runs/{ProcID}/interrupt".format(
+			URL=self.URL,
+			ProcID=PID
 			)
 		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
 		self.jsonData = self.OVCall.jsonData
@@ -1236,9 +1237,9 @@ class Export(object):
 			PID = self.processId
 		else:
 			PID = ProcessID
-		self.ImportURL = "https://%s/api/v3/exports/runs/%d"%(
-			self.URL,
-			PID
+		self.ImportURL = "https://{URL}/api/v3/exports/runs/{ProcID}".format(
+			URL=self.URL,
+			ProcID=PID
 			)
 		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
 		self.jsonData = self.OVCall.jsonData
@@ -1269,9 +1270,9 @@ class Export(object):
 			PID = self.processId
 		else:
 			PID = ProcessID
-		self.ImportURL = "https://%s/api/v3/exports/runs/%d/file"%(
-			self.URL,
-			PID
+		self.ImportURL = "https://{URL}/api/v3/exports/runs/{ProcID}/file".format(
+			URL=self.URL,
+			ProcID=PID
 			)
 
 		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
