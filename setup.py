@@ -3,7 +3,7 @@
 import os
 from setuptools import setup, find_packages
 #from onevizion import __version__
-__version__ = '1.0.20'
+__version__ = '1.0.21'
 
 #following PyPI guide: https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
 

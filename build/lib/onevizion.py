@@ -1405,7 +1405,7 @@ class EMail(object):
 		for key,value in self.info.items():
 			body = body + "\n\n" + key + ":"
 			if isinstance(value, basestring):
-				svalue = str(value.encode('ascii', 'ignore'))
+				svalue = value.encode('ascii', 'ignore').decode('ascii', 'ignore')
 			else:
 				svalue = str(value)
 			if "\n" in svalue:
