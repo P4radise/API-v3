@@ -106,7 +106,7 @@ class Singleton(object):
 			except IOError:
 				Quit()
 		self.initialized = True
-		
+
 	def __del__(self):
 		# Clean up File on Exit
 		if not self.initialized:
@@ -129,7 +129,7 @@ class Singleton(object):
 
 class curl(object):
 	"""Wrapper for requests.request() that will handle Error trapping and try to give JSON for calling.
-	If URL is passed on Instantiation, it will automatically run, else, it will wait for you to set 
+	If URL is passed on Instantiation, it will automatically run, else, it will wait for you to set
 	properties, then run it with runQuery() command.  Erors should be trapped and put into "errors" array.
 	If JSON is returned, it will be put into "data" as per json.loads
 
@@ -265,13 +265,13 @@ class OVImport(object):
 	def makeCall(self):
 
 		self.Import = Import(
-			URL=self.URL, 
-			userName=self.userName, 
-			password=self.password, 
-			impSpecId=self.impSpecId, 
-			file=self.file, 
-			action=self.action, 
-			comments=self.comments, 
+			URL=self.URL,
+			userName=self.userName,
+			password=self.password,
+			impSpecId=self.impSpecId,
+			file=self.file,
+			action=self.action,
+			comments=self.comments,
 			incremental=self.incremental
 			)
 		self.errors = self.Import.errors
@@ -346,26 +346,26 @@ class Trackor(object):
 
 
 
-	def read(self, 
-		trackorId=None, 
-		filterOptions=None, 
-		filters={}, 
+	def read(self,
+		trackorId=None,
+		filterOptions=None,
+		filters={},
 		search=None,
-		viewOptions=None, 
+		viewOptions=None,
 		fields=[],
 		sort={},
 		page=None,
 		perPage=1000
 		):
-		""" Retrieve some field data from a set of Trackor instances. List of Trackors must be 
+		""" Retrieve some field data from a set of Trackor instances. List of Trackors must be
 			identified either by trackorId or filterOptions, and data fields to be retieved must be
 			identified either by viewOptions or a list of fields.
-			
+
 			fields is an array of strings that are the Configured Field Names.
 		"""
-		
+
 		URL = "https://{Website}/api/v3/trackor_types/{TrackorType}/trackors".format(
-			Website=self.URL, 
+			Website=self.URL,
 			TrackorType=self.TrackorType
 			)
 		Method='GET'
@@ -381,7 +381,7 @@ class Trackor(object):
 					FilterSection = FilterSection.rstrip('?&')
 				else:
 					#Filtering based on Search Criteria
-					URL += "/search" 
+					URL += "/search"
 					SearchBody = {"data": search}
 					Method='POST'
 			else:
@@ -390,7 +390,7 @@ class Trackor(object):
 		else: 
 			#Filtering for specific TrackorID
 			URL = "https://{Website}/api/v3/trackors/{TrackorID}".format(
-				Website=self.URL, 
+				Website=self.URL,
 				TrackorID=str(trackorId)
 				)
 
@@ -431,8 +431,8 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(SearchBody,indent=2)			 
+			Config["Trace"][TraceTag+"-URL"] = URL
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(SearchBody,indent=2)
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -445,7 +445,7 @@ class Trackor(object):
 	def update(self, trackorId=None, filters={}, fields={}, parents={}, charset=""):
 		""" Update data in a list of fields for a Trackor instance.
 			"trackorId" is the direct unique identifier in the databse for the record.  Use this or Filters.
-			"filters" is a list of ConfigFieldName:value pairs that finds the unique 
+			"filters" is a list of ConfigFieldName:value pairs that finds the unique
 				Trackor instance to be updated.  Use "TrackorType.ConfigFieldName" to filter
 				with parent fields.
 			"fields" is a ConfigFieldName:Value pair for what to update.  The Value can either
@@ -491,13 +491,13 @@ class Trackor(object):
 				Filter = Filter + key + '=' + URLEncode(str(value)) + '&'
 			Filter = Filter.rstrip('?&')
 			URL = "https://{Website}/api/v3/trackor_types/{TrackorType}/trackors{Filter}".format(
-					Website=self.URL, 
-					TrackorType=self.TrackorType, 
+					Website=self.URL,
+					TrackorType=self.TrackorType,
 					Filter=Filter
 					)
 		else:
 			URL = "https://{Website}/api/v3/trackors/{TrackorID}".format(
-					Website=self.URL, 
+					Website=self.URL,
 					TrackorID=trackorId
 					)
 
@@ -520,7 +520,7 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-URL"] = URL
 			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2)
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
@@ -533,14 +533,14 @@ class Trackor(object):
 
 	def create(self,fields={},parents={}, charset=""):
 		""" Create a new Trackor instance and set some ConfigField and Parent values for it.
-			"filters" is a list of ConfigFieldName:value pairs that finds the unique 
+			"filters" is a list of ConfigFieldName:value pairs that finds the unique
 				Trackor instance to be updated.  Use "TrackorType.ConfigFieldName" to filter
 				with parent fields.
 			"fields" is a ConfigFieldName:Value pair for what to update.  The Value can either
 				be a string, or a dictionary of key:value pairs for parts fo teh field sto be updated
 				such as in and EFile field, one can have {"file_name":"name.txt","data":"Base64Encoded Text"}
 			"parents" is a list of TrackorType:Filter pairs.
-				"Filter" is a list of ConfigFieldName:value pairs that finds the unique 
+				"Filter" is a list of ConfigFieldName:value pairs that finds the unique
 					Trackor instance to be updated.  Use "TrackorType.ConfigFieldName" to filter
 					with parent fields.
 		"""
@@ -595,8 +595,8 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2)			
+			Config["Trace"][TraceTag+"-URL"] = URL
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(JSONObj,indent=2)
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -617,21 +617,21 @@ class Trackor(object):
 		"""
 
 		URL = "https://{website}/api/v3/trackors/{trackor_id}/assign_wp?workplan_template={workplan_template}".format(
-				website=self.URL, 
+				website=self.URL,
 				trackor_id=trackorId,
 				workplan_template=workplanTemplate
 				)
 
 		if name is not None:
 			URL += "&"+URLEncode(name)
-			
+
 		if startDate is not None:
 			if isinstance(startDate, (datetime.datetime,datetime.date)):
 				dt = startDate.strftime('%Y-%m-%d')
 			else:
 				dt = str(startDate)
 			URL += "&"+URLEncode(dt)
-			
+
 		if finishDate is not None:
 			if isinstance(finishDate, (datetime.datetime,datetime.date)):
 				dt = finishDate.strftime('%Y-%m-%d')
@@ -654,7 +654,7 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-URL"] = URL
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -668,7 +668,7 @@ class Trackor(object):
 		""" Get a File from a particular Trackor record's particular Configured field
 
 			trackorID: the system ID for the particular Trackor record that this is being assigned to.
-			fieldName: should be the Configured Field Name, not the Label.		  
+			fieldName: should be the Configured Field Name, not the Label.
 		"""
 
 		URL = "https://{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
@@ -691,7 +691,7 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-URL"] = URL
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -738,8 +738,8 @@ class Trackor(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-FileName"] = fileName			
+			Config["Trace"][TraceTag+"-URL"] = URL
+			Config["Trace"][TraceTag+"-FileName"] = fileName
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -755,7 +755,7 @@ class Trackor(object):
 
 
 class WorkPlan(object):
-	"""Wrapper for calling the OneVizion API for WorkPlans.  You can Read or Update 
+	"""Wrapper for calling the OneVizion API for WorkPlans.  You can Read or Update
 		WorkPlan instances with the like named methods.
 
 	Attributes:
@@ -784,7 +784,7 @@ class WorkPlan(object):
 				self.password = Config["ParameterData"][paramToken]['Password']
 
 	def read(self, workplanId = None, workplanTemplate = "", trackorType = "", trackorId = None):
-		""" Retrieve some data about a particular WorkPlan.WorkPlan must be 
+		""" Retrieve some data about a particular WorkPlan.WorkPlan must be
 			identified either by workplanId or by a WorkPlanTemplate, TrackorType, and TrackorID
 		"""
 		FilterSection = ""
@@ -812,7 +812,7 @@ class WorkPlan(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-URL"] = URL
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -820,7 +820,7 @@ class WorkPlan(object):
 			except Exception as e:
 				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
-			
+
 
 
 class Task(object):
@@ -841,7 +841,7 @@ class Task(object):
 				self.password = Config["ParameterData"][paramToken]['Password']
 
 	def read(self, taskId = None, workplanId=None, orderNumber=None):
-		""" Retrieve some data about a particular WorkPlan Tasks. Tasks must be 
+		""" Retrieve some data about a particular WorkPlan Tasks. Tasks must be
 			identified either by workplanId, workplanId and orderNumber or by a taskId
 		"""
 		if taskId is not None:
@@ -863,7 +863,7 @@ class Task(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = URL 
+			Config["Trace"][TraceTag+"-URL"] = URL
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -896,8 +896,8 @@ class Task(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = URL 
-			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(fields,indent=2)			 
+			Config["Trace"][TraceTag+"-URL"] = URL
+			Config["Trace"][TraceTag+"-PostBody"] = json.dumps(fields,indent=2)
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -910,15 +910,15 @@ class Task(object):
 class Import(object):
 
 	def __init__(
-		self, 
-		URL=None, 
-		userName=None, 
-		password=None, 
-		impSpecId=None, 
-		file=None, 
-		action='INSERT_UPDATE', 
-		comments=None, 
-		incremental=None, 
+		self,
+		URL=None,
+		userName=None,
+		password=None,
+		impSpecId=None,
+		file=None,
+		action='INSERT_UPDATE',
+		comments=None,
+		incremental=None,
 		paramToken=None
 		):
 		self.URL = URL
@@ -970,7 +970,7 @@ class Import(object):
 		self.TraceTag = TraceTag
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
-			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL
 			Config["Trace"][TraceTag+"-FileName"] = self.ImportFile
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
@@ -982,13 +982,13 @@ class Import(object):
 		else:
 			if "error_message" in self.jsonData and len(self.jsonData["error_message"]) > 0:
 				self.errors.append(self.jsonData["error_message"])
-				Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+				Config["Trace"][TraceTag+"-URL"] = self.ImportURL
 				Config["Trace"][TraceTag+"-FileName"] = self.ImportFile
 				TraceMessage("Eror Message: {Error}".format(Error=self.jsonData["error_message"]),0,TraceTag+"-ErrorMessage")
 				Config["Error"]=True
 			if "warnings" in self.jsonData and len(self.jsonData["warnings"]) > 0:
 				self.warnings.extend(self.jsonData["warnings"])
-				Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+				Config["Trace"][TraceTag+"-URL"] = self.ImportURL
 				Config["Trace"][TraceTag+"-FileName"] = self.ImportFile
 				TraceMessage("Eror Message: {Error}".format(Error=self.jsonData["warnings"]),0,TraceTag+"-Warnings")
 			if "process_id" in self.jsonData:
@@ -1015,7 +1015,7 @@ class Import(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -1075,7 +1075,7 @@ class Import(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -1099,10 +1099,10 @@ class Import(object):
 class Export(object):
 
 	def __init__(
-		self, 
-		URL=None, 
-		userName=None, 
-		password=None, 
+		self,
+		URL=None,
+		userName=None,
+		password=None,
 		trackorType=None,
 		filters={},
 		fields=[],
@@ -1111,7 +1111,7 @@ class Export(object):
 		viewOptions=None,
 		filterOptions=None,
 		fileFields=None,
-		comments=None, 
+		comments=None,
 		paramToken=None
 		):
 		self.URL = URL
@@ -1181,7 +1181,7 @@ class Export(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -1219,7 +1219,7 @@ class Export(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -1251,7 +1251,7 @@ class Export(object):
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
-			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -1284,7 +1284,7 @@ class Export(object):
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
-			Config["Trace"][TraceTag+"-URL"] = self.ImportURL 
+			Config["Trace"][TraceTag+"-URL"] = self.ImportURL
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
@@ -1304,7 +1304,7 @@ class Export(object):
 
 class EMail(object):
 	"""Made to simplify sending Email notifications in scripts.
-	
+
 	Attributes:
 		server: the SSL SMTP server for the mail connection
 		port: the port to conenct to- 465 by default
@@ -1323,7 +1323,7 @@ class EMail(object):
 		self.server = "mail.onevizion.com"
 		self.port = 587
 		self.security = "STARTTLS"
-		self.tls = "False" 
+		self.tls = "False"
 		self.userName = ""
 		self.password = ""
 		self.to = []
@@ -1405,7 +1405,7 @@ class EMail(object):
 		for key,value in self.info.items():
 			body = body + "\n\n" + key + ":"
 			if isinstance(value, basestring):
-				svalue = value.encode('ascii', 'ignore')
+				svalue = str(value.encode('ascii', 'ignore'))
 			else:
 				svalue = str(value)
 			if "\n" in svalue:
@@ -1413,7 +1413,7 @@ class EMail(object):
 			else:
 				body = body + " " + svalue
 		self.body = body
-		
+
 		part = MIMEText(body, 'plain')
 		msg.attach(part)
 
