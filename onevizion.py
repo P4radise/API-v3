@@ -8,6 +8,15 @@ import datetime
 import base64
 from collections import OrderedDict
 
+Config = {
+	"Verbosity":0,
+	"ParameterFile":None,
+	"ParameterData":{},
+	"SMTPToken":None,
+	"Trace":OrderedDict(),
+	"Error":False
+	}
+
 #Let's add some compatibility between Python 2 and 3
 try:
 	unicode = unicode
@@ -17,22 +26,20 @@ except NameError:
 	unicode = str
 	bytes = bytes
 	basestring = (str,bytes)
+	Config["PythonVer"] = "3"
 else:
 	# 'unicode' exists, must be Python 2
 	str = str
 	unicode = unicode
 	bytes = str
 	basestring = basestring
+	Config["PythonVer"] = "2"
 
 
-Config = {
-	"Verbosity":0,
-	"ParameterFile":None,
-	"ParameterData":{},
-	"SMTPToken":None,
-	"Trace":OrderedDict(),
-	"Error":False
-	}
+Config["Platform"] = sys.platform
+if Config["Platform"] != 'win32':
+	import fcntl
+
 
 def Message(Msg,Level=0):
 	"""Prints a message depending on the verbosity level set on the command line"""
@@ -78,6 +85,9 @@ class Singleton(object):
 
 		self.initialized = False
 		self.foundProcess = False
+		self.platform = Config["Platform"]
+		if self.platform != 'win32':
+			import fcntl
 		# Choose Filename for Lock File
 		if LockFileName is None:
 			import __main__
@@ -85,7 +95,7 @@ class Singleton(object):
 		else:
 			self.LockFileName = LockFileName
 		# Make Sure this script is not still running from last time before we run
-		if sys.platform == 'win32':
+		if self.platform == 'win32':
 			try:
 				# file already exists, we try to remove (in case previous
 				# execution was interrupted)
@@ -112,12 +122,11 @@ class Singleton(object):
 		if not self.initialized:
 			return
 		try:
-			if sys.platform == 'win32':
+			if self.platform == 'win32':
 				if hasattr(self, 'LockFile'):
 					os.close(self.LockFileName)
 					os.unlink(self.LockFileName)
 			else:
-				import fcntl
 				fcntl.lockf(self.LockFile, fcntl.LOCK_UN)
 				# os.close(self.fp)
 				if os.path.isfile(self.LockFileName):
