@@ -396,7 +396,7 @@ class Trackor(object):
 			else:
 				#Filtering basd on filterOptions
 				FilterSection = "filter="+URLEncode(filterOptions)
-		else: 
+		else:
 			#Filtering for specific TrackorID
 			URL = "https://{Website}/api/v3/trackors/{TrackorID}".format(
 				Website=self.URL,
@@ -405,7 +405,7 @@ class Trackor(object):
 
 		if len(FilterSection) == 0:
 			ViewSection = ""
-		else: 
+		else:
 			ViewSection = "&"
 		if viewOptions is None:
 			ViewSection += 'fields=' + ",".join(fields)
@@ -975,7 +975,7 @@ class Import(object):
 		Message(self.ImportURL,2)
 		Message("FileName: {FileName}".format(FileName=self.ImportFile),2)
 		Message("Import Send completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
-		TraceTag="{TimeStamp}:{FileName}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'),FileName=file)
+		TraceTag="{TimeStamp}:{FileName}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'),FileName=self.file)
 		self.TraceTag = TraceTag
 		if len(self.OVCall.errors) > 0:
 			self.errors.append(self.OVCall.errors)
