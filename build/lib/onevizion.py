@@ -680,6 +680,19 @@ class Trackor(object):
 			fieldName: should be the Configured Field Name, not the Label.
 		"""
 
+		def get_filename_from_cd(cd):
+			"""
+			Get filename from content-disposition
+			"""
+			if not cd:
+				return None
+			import re
+			fname = re.findall('filename=(.+)', cd)
+			if len(fname) == 0:
+				return None
+			return fname[0]
+
+
 		URL = "https://{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
 				Website=self.URL,
 				TrackorID=trackorId,
@@ -687,27 +700,52 @@ class Trackor(object):
 				)
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
-		self.jsonData = self.OVCall.jsonData
-		self.request = self.OVCall.request
+
+		tmpFileName = str(trackorId)+fieldName+".tmp"
+		before = datetime.datetime.utcnow()
+		try:
+			# NOTE the stream=True parameter
+			self.request = requests.get(URL, stream=True, auth=(self.userName,self.password),allow_redirects=True)
+			with open(tmpFileName, 'wb') as f:
+				for chunk in self.request.iter_content(chunk_size=1024):
+					if chunk: # filter out keep-alive new chunks
+						f.write(chunk)
+						#f.flush() commented by recommendation from J.F.Sebastian
+		except Exception as e:
+			self.errors.append(str(e))
+		else:
+			if self.request.status_code not in range(200,300):
+				self.errors.append(str(self.request.status_code)+" = "+self.request.reason)
+		after = datetime.datetime.utcnow()
+		delta = after - before
+		self.duration = delta.total_seconds()
 
 		Message(URL,2)
 		Message("{TrackorType} get file completed in {Duration} seconds.".format(
 			TrackorType=self.TrackorType,
-			Duration=self.OVCall.duration
+			Duration=self.duration
 			),1)
-		if len(self.OVCall.errors) > 0:
-			self.errors.append(self.OVCall.errors)
+		if len(self.errors) > 0:
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
 			self.TraceTag = TraceTag
 			Config["Trace"][TraceTag+"-URL"] = URL
 			try:
-				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
-				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
-				TraceMessage("Body:\n{Body}".format(Body=self.OVCall.request.text),0,TraceTag+"-Body")
+				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.request.status_code),0,TraceTag+"-StatusCode")
+				TraceMessage("Reason: {Reason}".format(Reason=self.request.reason),0,TraceTag+"-Reason")
+				TraceMessage("Body:\n{Body}".format(Body=self.request.text),0,TraceTag+"-Body")
 			except Exception as e:
-				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
+				pass
+				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.errors,indent=2)),0,TraceTag+"-Errors")
 			Config["Error"]=True
+
+		# return the name of the fiel that was downloaded.
+		newFileName = get_filename_from_cd(self.request.headers.get('content-disposition'))
+		if newFileName is not None and len(newFileName) > 0:
+			os.rename(tmpFileName,newFileName)
+			return newFileName
+		else:
+			return tmpFileName
+
 
 
 	def UploadFile(self, trackorId, fieldName, fileName, newFileName=None):
