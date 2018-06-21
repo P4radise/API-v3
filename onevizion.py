@@ -771,7 +771,7 @@ class Trackor(object):
 			File = {'file': (newFileName, open(fileName, 'rb'))}
 		else:
 			URL += "?file_name="+URLEncode(os.path.basename(fileName))
-			File = {'file': (fileName, open(fileName, 'rb'))}
+			File = {'file': (os.path.basename(fileName), open(fileName, 'rb'))}
 
 		self.errors = []
 		self.jsonData = {}
@@ -1009,7 +1009,7 @@ class Import(object):
 			self.ImportURL += '&comments=' + URLEncode(self.comments)
 		if self.incremental is not None:
 			self.ImportURL += '&is_incremental=' + str(self.incremental)
-		self.ImportFile = {'file': (self.file, open(self.file,'rb'))}
+		self.ImportFile = {'file': (os.path.basename(self.file), open(self.file,'rb'))}
 		self.OVCall = curl('POST',self.ImportURL,files=self.ImportFile,auth=(self.userName,self.password))
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
