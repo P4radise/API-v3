@@ -768,7 +768,7 @@ class Trackor(object):
 				)
 		if newFileName is not None:
 			URL += "?file_name="+URLEncode(newFileName)
-			File = {'file': (newFileName, open(fileName, 'rb'))}
+			File = {'file': (os.path.basename(newFileName), open(fileName, 'rb'))}
 		else:
 			URL += "?file_name="+URLEncode(os.path.basename(fileName))
 			File = {'file': (os.path.basename(fileName), open(fileName, 'rb'))}
