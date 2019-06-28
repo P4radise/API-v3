@@ -513,6 +513,7 @@ class Trackor(object):
 					Website=self.URL,
 					TrackorID=trackorId
 					)
+			JSON = json.dumps(FieldsSection)
 
 		Headers = {'content-type': 'application/x-www-form-urlencoded'}
 		if charset != "":
@@ -691,7 +692,7 @@ class Trackor(object):
 			if not cd:
 				return None
 			import re
-			fname = re.findall('filename=(.+)', cd)
+			fname = re.findall("filename[\*]*=(?>UTF-8'')*(.+)", cd)
 			if len(fname) == 0:
 				return None
 			return fname[0]
@@ -768,7 +769,7 @@ class Trackor(object):
 				)
 		if newFileName is not None:
 			URL += "?file_name="+URLEncode(newFileName)
-			File = {'file': (newFileName, open(fileName, 'rb'))}
+			File = {'file': (os.path.basename(newFileName), open(fileName, 'rb'))}
 		else:
 			URL += "?file_name="+URLEncode(os.path.basename(fileName))
 			File = {'file': (os.path.basename(fileName), open(fileName, 'rb'))}
