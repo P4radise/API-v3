@@ -226,6 +226,23 @@ class curl(object):
 		self.duration = delta.total_seconds()
 
 
+class HTTPBearerAuth(requests.auth.AuthBase):
+	"""Wrapper to create the header needed for authentication using a token
+
+	Attributes:
+		ovAccessKey: OneVizion Access Key
+		ovSecretKey: OneVizion Secret Key
+	"""
+
+	def __init__(self, ovAccessKey, ovSecretKey):
+		self.accessKey = ovAccessKey
+		self.secretKey = ovSecretKey
+
+	def __call__(self, r):
+		r.headers['Authorization'] = 'Bearer ' + self.accessKey + ':' + self.secretKey
+		return r
+
+
 
 
 
@@ -249,7 +266,7 @@ class OVImport(object):
 		processId: the system processId returned from the API call
 	"""
 
-	def __init__(self, URL=None, userName=None, password=None, impSpecId=None, file=None, action='INSERT_UPDATE', comments=None, incremental=None, paramToken=None):
+	def __init__(self, URL=None, userName=None, password=None, impSpecId=None, file=None, action='INSERT_UPDATE', comments=None, incremental=None, paramToken=None, ovToken=False):
 		self.URL = URL
 		self.userName = userName
 		self.password = password
@@ -262,6 +279,7 @@ class OVImport(object):
 		self.request = {}
 		self.jsonData = {}
 		self.processId = None
+		self.ovToken = ovToken
 
 		if paramToken is not None:
 			if self.URL is None:
@@ -285,7 +303,8 @@ class OVImport(object):
 			file=self.file,
 			action=self.action,
 			comments=self.comments,
-			incremental=self.incremental
+			incremental=self.incremental,
+			ovToken=self.ovToken
 			)
 		self.errors = self.Import.errors
 		if len(self.Import.errors) == 0:
@@ -310,7 +329,7 @@ class Trackor(object):
 		jsonData: the json data converted to python array
 	"""
 
-	def __init__(self, trackorType = "", URL = "", userName="", password="", paramToken=None):
+	def __init__(self, trackorType = "", URL = "", userName="", password="", paramToken=None, ovToken=False):
 		self.TrackorType = trackorType
 		self.URL = URL
 		self.userName = userName
@@ -328,7 +347,10 @@ class Trackor(object):
 			if self.password == "":
 				self.password = Config["ParameterData"][paramToken]['Password']
 
-
+		if ovToken == True:
+			self.auth = HTTPBearerAuth(self.userName, self.password)
+		else:
+			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 
 	def delete(self,trackorId):
 		""" Delete a Trackor instance.  Must pass a trackorId, the unique DB number.
@@ -338,7 +360,7 @@ class Trackor(object):
 		URL = "https://{URL}/api/v3/trackor_types/{TrackorType}/trackors?{FilterSection}".format(URL=self.URL, TrackorType=self.TrackorType, FilterSection=FilterSection)
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('DELETE',URL,auth=(self.userName,self.password))
+		self.OVCall = curl('DELETE',URL,auth=self.auth)
 		Message(URL,2)
 		Message("Deletes completed in {Duration} seconds.".format(Duration=self.OVCall.duration),1)
 		if len(self.OVCall.errors) > 0:
@@ -430,7 +452,7 @@ class Trackor(object):
 
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl(Method,URL,auth=(self.userName,self.password),**SearchBody)
+		self.OVCall = curl(Method,URL,auth=self.auth,**SearchBody)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -520,7 +542,7 @@ class Trackor(object):
 			Headers['charset'] = charset
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('PUT',URL, data=JSON, headers=Headers, auth=(self.userName,self.password))
+		self.OVCall = curl('PUT',URL, data=JSON, headers=Headers, auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -595,7 +617,7 @@ class Trackor(object):
 			Headers['charset'] = charset
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('POST',URL, data=JSON, headers=Headers, auth=(self.userName,self.password))
+		self.OVCall = curl('POST',URL, data=JSON, headers=Headers, auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -655,7 +677,7 @@ class Trackor(object):
 
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('POST',URL,auth=(self.userName,self.password))
+		self.OVCall = curl('POST',URL,auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -710,7 +732,7 @@ class Trackor(object):
 		before = datetime.datetime.utcnow()
 		try:
 			# NOTE the stream=True parameter
-			self.request = requests.get(URL, stream=True, auth=(self.userName,self.password),allow_redirects=True)
+			self.request = requests.get(URL, stream=True, auth=self.auth,allow_redirects=True)
 			with open(tmpFileName, 'wb') as f:
 				for chunk in self.request.iter_content(chunk_size=1024):
 					if chunk: # filter out keep-alive new chunks
@@ -776,7 +798,7 @@ class Trackor(object):
 
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('POST',URL,auth=(self.userName,self.password),files=File)
+		self.OVCall = curl('POST',URL,auth=self.auth,files=File)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -820,7 +842,7 @@ class WorkPlan(object):
 		jsonData: the json data converted to python array
 	"""
 
-	def __init__(self, URL = "", userName="", password="", paramToken=None):
+	def __init__(self, URL = "", userName="", password="", paramToken=None, ovToken=False):
 		self.URL = URL
 		self.userName = userName
 		self.password = password
@@ -834,6 +856,11 @@ class WorkPlan(object):
 				self.userName = Config["ParameterData"][paramToken]['UserName']
 			if self.password == "":
 				self.password = Config["ParameterData"][paramToken]['Password']
+
+		if ovToken == True:
+			self.auth = HTTPBearerAuth(self.userName, self.password)
+		else:
+			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 
 	def read(self, workplanId = None, workplanTemplate = "", trackorType = "", trackorId = None):
 		""" Retrieve some data about a particular WorkPlan.WorkPlan must be
@@ -854,7 +881,7 @@ class WorkPlan(object):
 		URL = "https://{URL}/api/v3/wps/{FilterSection}".format(URL=self.URL, FilterSection=FilterSection)
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
+		self.OVCall = curl('GET',URL,auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -877,7 +904,7 @@ class WorkPlan(object):
 
 class Task(object):
 
-	def __init__(self, URL = "", userName="", password="", paramToken=None):
+	def __init__(self, URL = "", userName="", password="", paramToken=None, ovToken=False):
 		self.URL = URL
 		self.userName = userName
 		self.password = password
@@ -892,6 +919,11 @@ class Task(object):
 			if self.password == "":
 				self.password = Config["ParameterData"][paramToken]['Password']
 
+		if ovToken == True:
+			self.auth = HTTPBearerAuth(self.userName, self.password)
+		else:
+			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
+
 	def read(self, taskId = None, workplanId=None, orderNumber=None):
 		""" Retrieve some data about a particular WorkPlan Tasks. Tasks must be
 			identified either by workplanId, workplanId and orderNumber or by a taskId
@@ -905,7 +937,7 @@ class Task(object):
 
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('GET',URL,auth=(self.userName,self.password))
+		self.OVCall = curl('GET',URL,auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -937,7 +969,7 @@ class Task(object):
 		Headers = {'content-type': 'application/x-www-form-urlencoded'}
 		self.errors = []
 		self.jsonData = {}
-		self.OVCall = curl('PUT',URL, data=JSON, headers=Headers, auth=(self.userName,self.password))
+		self.OVCall = curl('PUT',URL, data=JSON, headers=Headers, auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -971,7 +1003,8 @@ class Import(object):
 		action='INSERT_UPDATE',
 		comments=None,
 		incremental=None,
-		paramToken=None
+		paramToken=None,
+		ovToken=False
 		):
 		self.URL = URL
 		self.userName = userName
@@ -998,6 +1031,10 @@ class Import(object):
 
 		# If all info is filled out, go ahead and run the query.
 		if self.URL != None and self.userName != None and self.password != None and self.impSpecId != None and self.file != None:
+			if ovToken == True:
+				self.auth = HTTPBearerAuth(self.userName, self.password)
+			else:
+				self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 			self.run()
 
 	def run(self):
@@ -1011,7 +1048,7 @@ class Import(object):
 		if self.incremental is not None:
 			self.ImportURL += '&is_incremental=' + str(self.incremental)
 		self.ImportFile = {'file': (os.path.basename(self.file), open(self.file,'rb'))}
-		self.OVCall = curl('POST',self.ImportURL,files=self.ImportFile,auth=(self.userName,self.password))
+		self.OVCall = curl('POST',self.ImportURL,files=self.ImportFile,auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -1057,7 +1094,7 @@ class Import(object):
 			URL=self.URL,
 			ProcID=PID
 			)
-		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
+		self.OVCall = curl('POST',self.ImportURL,auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -1117,7 +1154,7 @@ class Import(object):
 			else:
 				self.ImportURL += "/"+str(processId)
 
-		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
+		self.OVCall = curl('GET',self.ImportURL,auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -1164,7 +1201,8 @@ class Export(object):
 		filterOptions=None,
 		fileFields=None,
 		comments=None,
-		paramToken=None
+		paramToken=None,
+		ovToken=False
 		):
 		self.URL = URL
 		self.userName = userName
@@ -1195,6 +1233,10 @@ class Export(object):
 
 		# If all info is filled out, go ahead and run the query.
 		if self.URL is not None and self.userName is not None and self.password is not None and self.trackorType is not None and (self.viewOptions is not None or len(self.fields)>0 or self.fileFields is not None) and (self.filterOptions is not None or len(self.filters)>0):
+			if ovToken == True:
+				self.auth = HTTPBearerAuth(self.userName, self.password)
+			else:
+				self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 			self.run()
 
 	def run(self):
@@ -1223,7 +1265,7 @@ class Export(object):
 
 		if self.comments is not None:
 			self.ImportURL += '&comments=' + URLEncode(self.comments)
-		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
+		self.OVCall = curl('POST',self.ImportURL,auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -1261,7 +1303,7 @@ class Export(object):
 			URL=self.URL,
 			ProcID=PID
 			)
-		self.OVCall = curl('POST',self.ImportURL,auth=(self.userName,self.password))
+		self.OVCall = curl('POST',self.ImportURL,auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -1293,7 +1335,7 @@ class Export(object):
 			URL=self.URL,
 			ProcID=PID
 			)
-		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
+		self.OVCall = curl('GET',self.ImportURL,auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
@@ -1327,7 +1369,7 @@ class Export(object):
 			ProcID=PID
 			)
 
-		self.OVCall = curl('GET',self.ImportURL,auth=(self.userName,self.password))
+		self.OVCall = curl('GET',self.ImportURL,auth=self.auth)
 		self.jsonData = self.OVCall.jsonData
 		self.request = self.OVCall.request
 
