@@ -269,7 +269,7 @@ class OVImport(object):
 		processId: the system processId returned from the API call
 	"""
 
-	def __init__(self, URL=None, userName=None, password=None, impSpecId=None, file=None, action='INSERT_UPDATE', comments=None, incremental=None, paramToken=None, ovToken=False):
+	def __init__(self, URL=None, userName=None, password=None, impSpecId=None, file=None, action='INSERT_UPDATE', comments=None, incremental=None, paramToken=None, isTokenAuth=False):
 		self.URL = URL
 		self.userName = userName
 		self.password = password
@@ -282,7 +282,7 @@ class OVImport(object):
 		self.request = {}
 		self.jsonData = {}
 		self.processId = None
-		self.ovToken = ovToken
+		self.isTokenAuth = isTokenAuth
 
 		if paramToken is not None:
 			if self.URL is None:
@@ -307,7 +307,7 @@ class OVImport(object):
 			action=self.action,
 			comments=self.comments,
 			incremental=self.incremental,
-			ovToken=self.ovToken
+			isTokenAuth=self.isTokenAuth
 			)
 		self.errors = self.Import.errors
 		if len(self.Import.errors) == 0:
@@ -332,7 +332,7 @@ class Trackor(object):
 		jsonData: the json data converted to python array
 	"""
 
-	def __init__(self, trackorType = "", URL = "", userName="", password="", paramToken=None, ovToken=False):
+	def __init__(self, trackorType = "", URL = "", userName="", password="", paramToken=None, isTokenAuth=False):
 		self.TrackorType = trackorType
 		self.URL = URL
 		self.userName = userName
@@ -350,7 +350,7 @@ class Trackor(object):
 			if self.password == "":
 				self.password = Config["ParameterData"][paramToken]['Password']
 
-		if ovToken == True:
+		if isTokenAuth:
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
 			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
@@ -845,7 +845,7 @@ class WorkPlan(object):
 		jsonData: the json data converted to python array
 	"""
 
-	def __init__(self, URL = "", userName="", password="", paramToken=None, ovToken=False):
+	def __init__(self, URL = "", userName="", password="", paramToken=None, isTokenAuth=False):
 		self.URL = URL
 		self.userName = userName
 		self.password = password
@@ -860,7 +860,7 @@ class WorkPlan(object):
 			if self.password == "":
 				self.password = Config["ParameterData"][paramToken]['Password']
 
-		if ovToken == True:
+		if isTokenAuth:
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
 			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
@@ -907,7 +907,7 @@ class WorkPlan(object):
 
 class Task(object):
 
-	def __init__(self, URL = "", userName="", password="", paramToken=None, ovToken=False):
+	def __init__(self, URL = "", userName="", password="", paramToken=None, isTokenAuth=False):
 		self.URL = URL
 		self.userName = userName
 		self.password = password
@@ -922,7 +922,7 @@ class Task(object):
 			if self.password == "":
 				self.password = Config["ParameterData"][paramToken]['Password']
 
-		if ovToken == True:
+		if isTokenAuth:
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
 			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
@@ -1007,7 +1007,7 @@ class Import(object):
 		comments=None,
 		incremental=None,
 		paramToken=None,
-		ovToken=False
+		isTokenAuth=False
 		):
 		self.URL = URL
 		self.userName = userName
@@ -1034,7 +1034,7 @@ class Import(object):
 
 		# If all info is filled out, go ahead and run the query.
 		if self.URL != None and self.userName != None and self.password != None and self.impSpecId != None and self.file != None:
-			if ovToken == True:
+			if isTokenAuth:
 				self.auth = HTTPBearerAuth(self.userName, self.password)
 			else:
 				self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
@@ -1205,7 +1205,7 @@ class Export(object):
 		fileFields=None,
 		comments=None,
 		paramToken=None,
-		ovToken=False
+		isTokenAuth=False
 		):
 		self.URL = URL
 		self.userName = userName
@@ -1236,7 +1236,7 @@ class Export(object):
 
 		# If all info is filled out, go ahead and run the query.
 		if self.URL is not None and self.userName is not None and self.password is not None and self.trackorType is not None and (self.viewOptions is not None or len(self.fields)>0 or self.fileFields is not None) and (self.filterOptions is not None or len(self.filters)>0):
-			if ovToken == True:
+			if isTokenAuth:
 				self.auth = HTTPBearerAuth(self.userName, self.password)
 			else:
 				self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
@@ -1591,11 +1591,11 @@ class NotificationService(ABC):
         _prepareNotifQueue
 	"""
 
-    def __init__(self, serviceId, processId, URL="", userName="", password="", paramToken=None, ovToken=False, logLevel="", maxAttempts=1, nextAttemptDelay=30):
-        self._notifQueueApi = NotifQueueApi(serviceId, URL, userName, password, paramToken, ovToken)
+    def __init__(self, serviceId, processId, URL="", userName="", password="", paramToken=None, isTokenAuth=False, logLevel="", maxAttempts=1, nextAttemptDelay=30):
+        self._notifQueueApi = NotifQueueApi(serviceId, URL, userName, password, paramToken, isTokenAuth)
         self._maxAttempts = maxAttempts or 1
         self._nextAttemptDelay = nextAttemptDelay or 30
-        self._integrationLog = IntegrationLog(processId, URL, userName, password, paramToken, ovToken, logLevel)
+        self._integrationLog = IntegrationLog(processId, URL, userName, password, paramToken, isTokenAuth, logLevel)
 
     def start(self):
         self._integrationLog.add(LogLevel.INFO, "Starting Integration")
@@ -1702,7 +1702,7 @@ class NotifQueueApi:
         addNewAttempt
     """
 
-    def __init__(self, serviceId, URL="", userName="", password="", paramToken=None, ovToken=False):
+    def __init__(self, serviceId, URL="", userName="", password="", paramToken=None, isTokenAuth=False):
         self._serviceId = serviceId
         self._URL = URL
         self._userName = userName
@@ -1717,7 +1717,7 @@ class NotifQueueApi:
             if self._password == "":
                 self._password = Config["ParameterData"][paramToken]['Password']
 
-        if ovToken == True:
+        if isTokenAuth:
             self._auth = HTTPBearerAuth(self._userName, self._password)
         else:
             self._auth = requests.auth.HTTPBasicAuth(self._userName, self._password)
@@ -1788,7 +1788,7 @@ class IntegrationLog(object):
     Exception can be thrown for method 'add'
 	"""
 
-    def __init__(self, processId, URL="", userName="", password="", paramToken=None, ovToken=False, logLevelName=""):
+    def __init__(self, processId, URL="", userName="", password="", paramToken=None, isTokenAuth=False, logLevelName=""):
         self._URL = URL
         self._userName = userName
         self._password = password
@@ -1802,7 +1802,7 @@ class IntegrationLog(object):
             if self._password == "":
                 self._password = Config["ParameterData"][paramToken]['Password']
 
-        if ovToken == True:
+        if isTokenAuth:
             self._auth = HTTPBearerAuth(self._userName, self._password)
         else:
             self._auth = requests.auth.HTTPBasicAuth(self._userName, self._password)
