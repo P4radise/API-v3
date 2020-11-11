@@ -1580,8 +1580,8 @@ class NotificationService(ABC):
         serviceId: ID of the Notification Service
         processId: the system processId
 		URL: a string representing the website's main URL for instance "trackor.onevizion.com".
-		userName: a string that contains the username used to login to the system or that contains OneVizion API Security Token Access Key
-		password: a string that contains the password used to gain access to the system or that contains OneVizion API Security Token Secret Key
+		userName: the username or the OneVizion API Security Token Access Key that is used to login to the system
+		password: the password or the OneVizion API Security Token Secret Key that is used to gain access to the system
         logLevel: log level name (Info, Warning, Error, Debug) for logging integration actions
         maxAttempts: the number of attempts to send message 
         nextAttemptDelay: the delay in seconds before the next message sending after an unsuccessful attempt
@@ -1693,8 +1693,8 @@ class NotifQueue:
     Attributes:
         serviceId: ID of the Notification Service
 		URL: a string representing the website's main URL for instance "trackor.onevizion.com".
-		userName: a string that contains the username used to login to the system or that contains OneVizion API Security Token Access Key
-		password: a string that contains the password used to gain access to the system or that contains OneVizion API Security Token Secret Key
+		userName: the username or the OneVizion API Security Token Access Key that is used to login to the system
+		password: the password or the OneVizion API Security Token Secret Key that is used to gain access to the system
 
     Exception can be thrown for methods:
         getNotifQueue,
@@ -1781,8 +1781,8 @@ class IntegrationLog(object):
 	Attributes:
         processId: the system processId
 		URL: A string representing the website's main URL for instance "trackor.onevizion.com".
-		userName: a string that contains the username used to login to the system or that contains OneVizion API Security Token Access Key
-		password: a string that contains the password used to gain access to the system or that contains OneVizion API Security Token Secret Key
+		userName: the username or the OneVizion API Security Token Access Key that is used to login to the system
+		password: the password or the OneVizion API Security Token Secret Key that is used to gain access to the system
         logLevel: log level name (Info, Warning, Error, Debug) for logging integration actions
 
     Exception can be thrown for method 'add'
