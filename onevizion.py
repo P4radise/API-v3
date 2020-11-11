@@ -1579,9 +1579,9 @@ class NotificationService(ABC):
 	Attributes:
         serviceId: ID of the Notification Service
         processId: the system processId
-		URL: A string representing the website's main URL for instance "trackor.onevizion.com".
-		userName: the username used to login to the system or OneVizion API Security Token Access Key
-		password: the password used to gain access to the system or OneVizion API Security Token Secret Key
+		URL: a string representing the website's main URL for instance "trackor.onevizion.com".
+		userName: a string that contains the username used to login to the system or that contains OneVizion API Security Token Access Key
+		password: a string that contains the password used to gain access to the system or that contains OneVizion API Security Token Secret Key
         logLevel: log level name (Info, Warning, Error, Debug) for logging integration actions
         maxAttempts: the number of attempts to send message 
         nextAttemptDelay: the delay in seconds before the next message sending after an unsuccessful attempt
@@ -1592,7 +1592,7 @@ class NotificationService(ABC):
 	"""
 
     def __init__(self, serviceId, processId, URL="", userName="", password="", paramToken=None, isTokenAuth=False, logLevel="", maxAttempts=1, nextAttemptDelay=30):
-        self._notifQueueApi = NotifQueueApi(serviceId, URL, userName, password, paramToken, isTokenAuth)
+        self._notifQueue = NotifQueue(serviceId, URL, userName, password, paramToken, isTokenAuth)
         self._maxAttempts = maxAttempts or 1
         self._nextAttemptDelay = nextAttemptDelay or 30
         self._integrationLog = IntegrationLog(processId, URL, userName, password, paramToken, isTokenAuth, logLevel)
@@ -1602,7 +1602,7 @@ class NotificationService(ABC):
         attempts = 0
 
         self._integrationLog.add(LogLevel.INFO, "Receiving Notif Queue")
-        notifQueueJson = self._notifQueueApi.getNotifQueue()
+        notifQueueJson = self._notifQueue.getNotifQueue()
         self._integrationLog.add(LogLevel.DEBUG, "Notif Queue json data", str(notifQueueJson))
 
         try:
@@ -1629,12 +1629,12 @@ class NotificationService(ABC):
                                               "Sending Notif Queue Record with id = [{}]".format(
                                                   notifQueueRec.notifQueueId))
                 notifQueueRec.status = NotifQueueStatus.SENDING.name
-                self._notifQueueApi.updateNotifQueueRecStatusByObject(notifQueueRec)
+                self._notifQueue.updateNotifQueueRecStatus(notifQueueRec)
 
                 try:
                     self.sendNotification(notifQueueRec)
                 except Exception as e:
-                    self._notifQueueApi.addNewAttempt(notifQueueRec.notifQueueId, str(e))
+                    self._notifQueue.addNewAttempt(notifQueueRec.notifQueueId, str(e))
                     self._integrationLog.add(LogLevel.ERROR,
                                                   "Can't send Notif Queue Record with id = [{}]".format(
                                                       notifQueueRec.notifQueueId),
@@ -1648,7 +1648,7 @@ class NotificationService(ABC):
                 else:
                     notifQueueRec.status = NotifQueueStatus.SUCCESS.name
 
-                self._notifQueueApi.updateNotifQueueRecStatusByObject(notifQueueRec)
+                self._notifQueue.updateNotifQueueRecStatus(notifQueueRec)
 
             preparedNotifQueue = list(
                 filter(lambda rec: rec.status != NotifQueueStatus.SUCCESS.name, preparedNotifQueue))
@@ -1686,19 +1686,19 @@ class NotificationService(ABC):
         return notifQueue
 
     
-class NotifQueueApi:
+class NotifQueue:
     """Wrapper for calling the Onvizion API for Notification Queue. You can get a Notifications Queue, 
         update the status of a notification queue record, add new attempt 
 
     Attributes:
         serviceId: ID of the Notification Service
-		URL: A string representing the website's main URL for instance "trackor.onevizion.com".
-		userName: the username used to login to the system or OneVizion API Security Token Access Key
-		password: the password used to gain access to the system or OneVizion API Security Token Secret Key
+		URL: a string representing the website's main URL for instance "trackor.onevizion.com".
+		userName: a string that contains the username used to login to the system or that contains OneVizion API Security Token Access Key
+		password: a string that contains the password used to gain access to the system or that contains OneVizion API Security Token Secret Key
 
     Exception can be thrown for methods:
         getNotifQueue,
-        updateNotifQueueRecStatus,
+        updateNotifQueueRecStatusById,
         addNewAttempt
     """
 
@@ -1730,7 +1730,7 @@ class NotifQueueApi:
             raise Exception(OVCall.errors)
         return OVCall.jsonData
 
-    def updateNotifQueueRecStatus(self, notifQueueRecId, status):
+    def updateNotifQueueRecStatusById(self, notifQueueRecId, status):
         URL = "https://{URL}/api/internal/notif/queue/{notifQueueRecId}/update_status?status={status}".format(URL=self._URL, notifQueueRecId=notifQueueRecId, status=status)
         OVCall = curl('PATCH', URL, headers=self._headers, auth=self._auth)
         if len(OVCall.errors) > 0:
@@ -1742,8 +1742,8 @@ class NotifQueueApi:
         if len(OVCall.errors) > 0:
             raise Exception(OVCall.errors)
 
-    def updateNotifQueueRecStatusByObject(self, notifQueueRec):
-        self.updateNotifQueueRecStatus(notifQueueRec.notifQueueId, notifQueueRec.status)
+    def updateNotifQueueRecStatus(self, notifQueueRec):
+        self.updateNotifQueueRecStatusById(notifQueueRec.notifQueueId, notifQueueRec.status)
 
 
 class NotifQueueRecord:
@@ -1781,8 +1781,8 @@ class IntegrationLog(object):
 	Attributes:
         processId: the system processId
 		URL: A string representing the website's main URL for instance "trackor.onevizion.com".
-		userName: the username used to login to the system or OneVizion API Security Token Access Key
-		password: the password used to gain access to the system or OneVizion API Security Token Secret Key
+		userName: a string that contains the username used to login to the system or that contains OneVizion API Security Token Access Key
+		password: a string that contains the password used to gain access to the system or that contains OneVizion API Security Token Secret Key
         logLevel: log level name (Info, Warning, Error, Debug) for logging integration actions
 
     Exception can be thrown for method 'add'
