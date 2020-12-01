@@ -1423,6 +1423,7 @@ class EMail(object):
 		self.tls = "False"
 		self.userName = ""
 		self.password = ""
+		self.from = ""
 		self.to = []
 		self.cc = []
 		self.subject = ""
@@ -1466,6 +1467,10 @@ class EMail(object):
 			self.security = 'STARTTLS'
 		if 'Security' in SMTP:
 			self.security = SMTP['Security']
+		if 'From' in SMTP:
+			self.from = SMTP['From']
+		else:
+			self.from = SMTP['UserName']
 		if 'To' in SMTP:
 			if type(SMTP['To']) is list:
 				self.to.extend(SMTP['To'])
@@ -1494,7 +1499,10 @@ class EMail(object):
 		from email.mime.text import MIMEText
 		msg = MIMEMultipart()
 		msg['To'] = ", ".join(self.to )
-		msg['From'] = self.userName
+		if self.from != '':
+			msg['From'] = self.from
+		else:
+			msg['From'] = self.userName
 		msg['Subject'] = self.subject
 
 		body = self.message + "\n"
@@ -1855,6 +1863,7 @@ ParameterExample = """Parameter File required.  Example:
 		"Server": "mail.onevizion.com",
 		"Port": "587",
 		"Security": "STARTTLS",
+		"From": "mgreene@onevizion.com",
 		"To":['jsmith@onevizion.com','mjones@onevizion.com'],
 		"CC":['bbrown@xyz.com','eric.goete@xyz.com']
 	},
