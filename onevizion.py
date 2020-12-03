@@ -8,7 +8,6 @@ import datetime
 import time
 import base64
 from collections import OrderedDict
-from abc import ABC, abstractmethod
 from enum import Enum
 
 Config = {
@@ -1579,279 +1578,279 @@ class EMail(object):
 		self.duration = delta.total_seconds()
 		Message("Sent Mail in {Duration} seconds.".format(Duration=self.duration),1)
 
+if Config["PythonVer"] == "3":
+	from abc import ABC, abstractmethod
+	class NotificationService(ABC):
+		"""Wrapper for getting records from the notification queue and sending them somewhere.
+			It is an abstract class whose 'sendNotification' method you must implement.
+
+		Attributes:
+			serviceId: ID of the Notification Service
+			processId: the system processId
+			URL: a string representing the website's main URL for instance "trackor.onevizion.com".
+			userName: the username or the OneVizion API Security Token Access Key that is used to login to the system
+			password: the password or the OneVizion API Security Token Secret Key that is used to gain access to the system
+			logLevel: log level name (Info, Warning, Error, Debug) for logging integration actions
+			maxAttempts: the number of attempts to send message 
+			nextAttemptDelay: the delay in seconds before the next message sending after an unsuccessful attempt
+
+		Exceptions are processed, written to the log and an exception is thrown for methods:
+			_convertNotifQueueJsonToList,
+			_prepareNotifQueue
+		"""
+
+		def __init__(self, serviceId, processId, URL="", userName="", password="", paramToken=None, isTokenAuth=False, logLevel="", maxAttempts=1, nextAttemptDelay=30):
+			self._notifQueue = NotifQueue(serviceId, URL, userName, password, paramToken, isTokenAuth)
+			self._maxAttempts = maxAttempts or 1
+			self._nextAttemptDelay = nextAttemptDelay or 30
+			self._integrationLog = IntegrationLog(processId, URL, userName, password, paramToken, isTokenAuth, logLevel)
+
+		def start(self):
+			self._integrationLog.add(LogLevel.INFO, "Starting Integration")
+			attempts = 0
+
+			self._integrationLog.add(LogLevel.INFO, "Receiving Notif Queue")
+			notifQueueJson = self._notifQueue.getNotifQueue()
+			self._integrationLog.add(LogLevel.DEBUG, "Notif Queue json data", str(notifQueueJson))
+
+			try:
+				notifQueue = self._convertNotifQueueJsonToList(notifQueueJson)
+			except Exception as e:
+				self._integrationLog.add(LogLevel.ERROR, "Can't convert Notif Queue json data to list", str(e))
+				raise Exception("Can't convert Notif Queue json data to list") #from e
+
+			preparedNotifQueue = []
+			try:
+				preparedNotifQueue = self._prepareNotifQueue(notifQueue)
+			except Exception as e:
+				self._integrationLog.add(LogLevel.ERROR, "Can't prepare Notif Queue to send", str(e))
+				raise Exception("Can't prepare Notif Queue to send") #from e
+
+			self._integrationLog.add(LogLevel.INFO, "Notif Queue size: [{}]".format(len(preparedNotifQueue)))
+
+			while len(preparedNotifQueue) > 0 and attempts < self._maxAttempts:
+				if attempts > 0:
+					self._integrationLog.add(LogLevel.INFO, "Attempt Number [{}]".format(attempts + 1))
+
+				for notifQueueRec in preparedNotifQueue:
+					self._integrationLog.add(LogLevel.INFO,
+												  "Sending Notif Queue Record with id = [{}]".format(
+													  notifQueueRec.notifQueueId))
+					notifQueueRec.status = NotifQueueStatus.SENDING.name
+					self._notifQueue.updateNotifQueueRecStatus(notifQueueRec)
+
+					try:
+						self.sendNotification(notifQueueRec)
+					except Exception as e:
+						self._notifQueue.addNewAttempt(notifQueueRec.notifQueueId, str(e))
+						self._integrationLog.add(LogLevel.ERROR,
+													  "Can't send Notif Queue Record with id = [{}]".format(
+														  notifQueueRec.notifQueueId),
+													  str(e))
+
+						if attempts + 1 == self._maxAttempts:
+							notifQueueRec.status = NotifQueueStatus.FAIL.name
+						else:
+							notifQueueRec.status = NotifQueueStatus.FAIL_WILL_RETRY.name
+
+					else:
+						notifQueueRec.status = NotifQueueStatus.SUCCESS.name
+
+					self._notifQueue.updateNotifQueueRecStatus(notifQueueRec)
+
+				preparedNotifQueue = list(
+					filter(lambda rec: rec.status != NotifQueueStatus.SUCCESS.name, preparedNotifQueue))
+				attempts += 1
+
+				if len(preparedNotifQueue) > 0 and self._maxAttempts > attempts:
+					self._integrationLog.add(LogLevel.WARNING,
+												  "Can't send [{0}] notifications. Next try in [{1}] seconds".format(
+													  len(preparedNotifQueue),
+													  self._nextAttemptDelay))
+					time.sleep(self._nextAttemptDelay)
+
+			if len(preparedNotifQueue) > 0:
+				self._integrationLog.add(LogLevel.ERROR,
+											  "Can't send [{}] notifications. All attempts have been exhausted.".format(
+												  len(preparedNotifQueue)))
+
+			self._integrationLog.add(LogLevel.INFO, "Integration has been completed")
+
+		@staticmethod
+		def _convertNotifQueueJsonToList(jsonData):
+			notifQueue = []
+			for jsonObj in jsonData:
+				notifQueue.append(NotifQueueRecord(jsonObj))
+			return notifQueue
+
+		@abstractmethod
+		def sendNotification(self, notifQueueRecord):
+			"""Send notifications anywhere. You must implement this in your integration. 
+				"notifQueueRecord": record from the notification queue. An instance of the NotifQueueRecord class
+			"""
+			pass
+
+		def _prepareNotifQueue(self, notifQueue):
+			return notifQueue
+
+		
+	class NotifQueue:
+		"""Wrapper for calling the Onvizion API for Notification Queue. You can get a Notifications Queue, 
+			update the status of a notification queue record, add new attempt 
+
+		Attributes:
+			serviceId: ID of the Notification Service
+			URL: a string representing the website's main URL for instance "trackor.onevizion.com".
+			userName: the username or the OneVizion API Security Token Access Key that is used to login to the system
+			password: the password or the OneVizion API Security Token Secret Key that is used to gain access to the system
+
+		Exception can be thrown for methods:
+			getNotifQueue,
+			updateNotifQueueRecStatusById,
+			addNewAttempt
+		"""
+
+		def __init__(self, serviceId, URL="", userName="", password="", paramToken=None, isTokenAuth=False):
+			self._serviceId = serviceId
+			self._URL = URL
+			self._userName = userName
+			self._password = password
+			self._headers = {'content-type': 'application/json'}
+
+			if paramToken is not None:
+				if self._URL == "":
+					self._URL = Config["ParameterData"][paramToken]['url']
+				if self._userName == "":
+					self._userName = Config["ParameterData"][paramToken]['UserName']
+				if self._password == "":
+					self._password = Config["ParameterData"][paramToken]['Password']
+
+			if isTokenAuth:
+				self._auth = HTTPBearerAuth(self._userName, self._password)
+			else:
+				self._auth = requests.auth.HTTPBasicAuth(self._userName, self._password)
 
 
-class NotificationService(ABC):
-    """Wrapper for getting records from the notification queue and sending them somewhere.
-        It is an abstract class whose 'sendNotification' method you must implement.
+		def getNotifQueue(self):
+			URL = "https://{URL}/api/internal/notif/queue?service_id={ServiceID}".format(URL=self._URL, ServiceID=self._serviceId)
+			OVCall = curl('GET', URL, headers=self._headers, auth=self._auth)
+			if len(OVCall.errors) > 0:
+				raise Exception(OVCall.errors)
+			return OVCall.jsonData
 
-	Attributes:
-        serviceId: ID of the Notification Service
-        processId: the system processId
-		URL: a string representing the website's main URL for instance "trackor.onevizion.com".
-		userName: the username or the OneVizion API Security Token Access Key that is used to login to the system
-		password: the password or the OneVizion API Security Token Secret Key that is used to gain access to the system
-        logLevel: log level name (Info, Warning, Error, Debug) for logging integration actions
-        maxAttempts: the number of attempts to send message 
-        nextAttemptDelay: the delay in seconds before the next message sending after an unsuccessful attempt
+		def updateNotifQueueRecStatusById(self, notifQueueRecId, status):
+			URL = "https://{URL}/api/internal/notif/queue/{notifQueueRecId}/update_status?status={status}".format(URL=self._URL, notifQueueRecId=notifQueueRecId, status=status)
+			OVCall = curl('PATCH', URL, headers=self._headers, auth=self._auth)
+			if len(OVCall.errors) > 0:
+				raise Exception(OVCall.errors)
 
-    Exceptions are processed, written to the log and an exception is thrown for methods:
-        _convertNotifQueueJsonToList,
-        _prepareNotifQueue
-	"""
+		def addNewAttempt(self, notifQueueRecId, errorMessage):
+			URL = "https://{URL}/api/internal/notif/queue/{notifQueueRecId}/attempts?error_code={errorMessage}".format(URL=self._URL, notifQueueRecId=notifQueueRecId, errorMessage=errorMessage)
+			OVCall = curl('POST', URL, headers=self._headers, auth=self._auth)
+			if len(OVCall.errors) > 0:
+				raise Exception(OVCall.errors)
 
-    def __init__(self, serviceId, processId, URL="", userName="", password="", paramToken=None, isTokenAuth=False, logLevel="", maxAttempts=1, nextAttemptDelay=30):
-        self._notifQueue = NotifQueue(serviceId, URL, userName, password, paramToken, isTokenAuth)
-        self._maxAttempts = maxAttempts or 1
-        self._nextAttemptDelay = nextAttemptDelay or 30
-        self._integrationLog = IntegrationLog(processId, URL, userName, password, paramToken, isTokenAuth, logLevel)
-
-    def start(self):
-        self._integrationLog.add(LogLevel.INFO, "Starting Integration")
-        attempts = 0
-
-        self._integrationLog.add(LogLevel.INFO, "Receiving Notif Queue")
-        notifQueueJson = self._notifQueue.getNotifQueue()
-        self._integrationLog.add(LogLevel.DEBUG, "Notif Queue json data", str(notifQueueJson))
-
-        try:
-            notifQueue = self._convertNotifQueueJsonToList(notifQueueJson)
-        except Exception as e:
-            self._integrationLog.add(LogLevel.ERROR, "Can't convert Notif Queue json data to list", str(e))
-            raise Exception("Can't convert Notif Queue json data to list") #from e
-
-        preparedNotifQueue = []
-        try:
-            preparedNotifQueue = self._prepareNotifQueue(notifQueue)
-        except Exception as e:
-            self._integrationLog.add(LogLevel.ERROR, "Can't prepare Notif Queue to send", str(e))
-            raise Exception("Can't prepare Notif Queue to send") #from e
-
-        self._integrationLog.add(LogLevel.INFO, "Notif Queue size: [{}]".format(len(preparedNotifQueue)))
-
-        while len(preparedNotifQueue) > 0 and attempts < self._maxAttempts:
-            if attempts > 0:
-                self._integrationLog.add(LogLevel.INFO, "Attempt Number [{}]".format(attempts + 1))
-
-            for notifQueueRec in preparedNotifQueue:
-                self._integrationLog.add(LogLevel.INFO,
-                                              "Sending Notif Queue Record with id = [{}]".format(
-                                                  notifQueueRec.notifQueueId))
-                notifQueueRec.status = NotifQueueStatus.SENDING.name
-                self._notifQueue.updateNotifQueueRecStatus(notifQueueRec)
-
-                try:
-                    self.sendNotification(notifQueueRec)
-                except Exception as e:
-                    self._notifQueue.addNewAttempt(notifQueueRec.notifQueueId, str(e))
-                    self._integrationLog.add(LogLevel.ERROR,
-                                                  "Can't send Notif Queue Record with id = [{}]".format(
-                                                      notifQueueRec.notifQueueId),
-                                                  str(e))
-
-                    if attempts + 1 == self._maxAttempts:
-                        notifQueueRec.status = NotifQueueStatus.FAIL.name
-                    else:
-                        notifQueueRec.status = NotifQueueStatus.FAIL_WILL_RETRY.name
-
-                else:
-                    notifQueueRec.status = NotifQueueStatus.SUCCESS.name
-
-                self._notifQueue.updateNotifQueueRecStatus(notifQueueRec)
-
-            preparedNotifQueue = list(
-                filter(lambda rec: rec.status != NotifQueueStatus.SUCCESS.name, preparedNotifQueue))
-            attempts += 1
-
-            if len(preparedNotifQueue) > 0 and self._maxAttempts > attempts:
-                self._integrationLog.add(LogLevel.WARNING,
-                                              "Can't send [{0}] notifications. Next try in [{1}] seconds".format(
-                                                  len(preparedNotifQueue),
-                                                  self._nextAttemptDelay))
-                time.sleep(self._nextAttemptDelay)
-
-        if len(preparedNotifQueue) > 0:
-            self._integrationLog.add(LogLevel.ERROR,
-                                          "Can't send [{}] notifications. All attempts have been exhausted.".format(
-                                              len(preparedNotifQueue)))
-
-        self._integrationLog.add(LogLevel.INFO, "Integration has been completed")
-
-    @staticmethod
-    def _convertNotifQueueJsonToList(jsonData):
-        notifQueue = []
-        for jsonObj in jsonData:
-            notifQueue.append(NotifQueueRecord(jsonObj))
-        return notifQueue
-
-    @abstractmethod
-    def sendNotification(self, notifQueueRecord):
-        """Send notifications anywhere. You must implement this in your integration. 
-            "notifQueueRecord": record from the notification queue. An instance of the NotifQueueRecord class
-        """
-        pass
-
-    def _prepareNotifQueue(self, notifQueue):
-        return notifQueue
-
-    
-class NotifQueue:
-    """Wrapper for calling the Onvizion API for Notification Queue. You can get a Notifications Queue, 
-        update the status of a notification queue record, add new attempt 
-
-    Attributes:
-        serviceId: ID of the Notification Service
-		URL: a string representing the website's main URL for instance "trackor.onevizion.com".
-		userName: the username or the OneVizion API Security Token Access Key that is used to login to the system
-		password: the password or the OneVizion API Security Token Secret Key that is used to gain access to the system
-
-    Exception can be thrown for methods:
-        getNotifQueue,
-        updateNotifQueueRecStatusById,
-        addNewAttempt
-    """
-
-    def __init__(self, serviceId, URL="", userName="", password="", paramToken=None, isTokenAuth=False):
-        self._serviceId = serviceId
-        self._URL = URL
-        self._userName = userName
-        self._password = password
-        self._headers = {'content-type': 'application/json'}
-
-        if paramToken is not None:
-            if self._URL == "":
-                self._URL = Config["ParameterData"][paramToken]['url']
-            if self._userName == "":
-                self._userName = Config["ParameterData"][paramToken]['UserName']
-            if self._password == "":
-                self._password = Config["ParameterData"][paramToken]['Password']
-
-        if isTokenAuth:
-            self._auth = HTTPBearerAuth(self._userName, self._password)
-        else:
-            self._auth = requests.auth.HTTPBasicAuth(self._userName, self._password)
+		def updateNotifQueueRecStatus(self, notifQueueRec):
+			self.updateNotifQueueRecStatusById(notifQueueRec.notifQueueId, notifQueueRec.status)
 
 
-    def getNotifQueue(self):
-        URL = "https://{URL}/api/internal/notif/queue?service_id={ServiceID}".format(URL=self._URL, ServiceID=self._serviceId)
-        OVCall = curl('GET', URL, headers=self._headers, auth=self._auth)
-        if len(OVCall.errors) > 0:
-            raise Exception(OVCall.errors)
-        return OVCall.jsonData
+	class NotifQueueRecord:
 
-    def updateNotifQueueRecStatusById(self, notifQueueRecId, status):
-        URL = "https://{URL}/api/internal/notif/queue/{notifQueueRecId}/update_status?status={status}".format(URL=self._URL, notifQueueRecId=notifQueueRecId, status=status)
-        OVCall = curl('PATCH', URL, headers=self._headers, auth=self._auth)
-        if len(OVCall.errors) > 0:
-            raise Exception(OVCall.errors)
-
-    def addNewAttempt(self, notifQueueRecId, errorMessage):
-        URL = "https://{URL}/api/internal/notif/queue/{notifQueueRecId}/attempts?error_code={errorMessage}".format(URL=self._URL, notifQueueRecId=notifQueueRecId, errorMessage=errorMessage)
-        OVCall = curl('POST', URL, headers=self._headers, auth=self._auth)
-        if len(OVCall.errors) > 0:
-            raise Exception(OVCall.errors)
-
-    def updateNotifQueueRecStatus(self, notifQueueRec):
-        self.updateNotifQueueRecStatusById(notifQueueRec.notifQueueId, notifQueueRec.status)
+		def __init__(self, jsonObject):
+			self.notifQueueId = jsonObject['notifQueueId']
+			self.userId = jsonObject['userId']
+			self.sender = jsonObject['sender']
+			self.toAddress = jsonObject['toAddress']
+			self.cc = jsonObject['cc']
+			self.bcc = jsonObject['bcc']
+			self.subj = jsonObject['subj']
+			self.replyTo = jsonObject['replyTo']
+			self.createdTs = jsonObject['createdTs']
+			self.status = jsonObject['status']
+			self.msg = jsonObject['msg']
+			self.html = jsonObject['html']
+			self.blobDataIds = jsonObject['blobDataIds']
 
 
-class NotifQueueRecord:
-
-    def __init__(self, jsonObject):
-        self.notifQueueId = jsonObject['notifQueueId']
-        self.userId = jsonObject['userId']
-        self.sender = jsonObject['sender']
-        self.toAddress = jsonObject['toAddress']
-        self.cc = jsonObject['cc']
-        self.bcc = jsonObject['bcc']
-        self.subj = jsonObject['subj']
-        self.replyTo = jsonObject['replyTo']
-        self.createdTs = jsonObject['createdTs']
-        self.status = jsonObject['status']
-        self.msg = jsonObject['msg']
-        self.html = jsonObject['html']
-        self.blobDataIds = jsonObject['blobDataIds']
-
-
-class NotifQueueStatus(Enum):
-    BUILDING = 0
-    NOT_SENT = 1
-    SENDING = 2
-    FAIL_WILL_RETRY = 3
-    FAIL = 4
-    SUCCESS = 5
+	class NotifQueueStatus(Enum):
+		BUILDING = 0
+		NOT_SENT = 1
+		SENDING = 2
+		FAIL_WILL_RETRY = 3
+		FAIL = 4
+		SUCCESS = 5
 
 
 
 
 class IntegrationLog(object):
-    """Wrapper for adding logs to the OneVizion.
+	"""Wrapper for adding logs to the OneVizion.
 
 	Attributes:
-        processId: the system processId
+		processId: the system processId
 		URL: A string representing the website's main URL for instance "trackor.onevizion.com".
 		userName: the username or the OneVizion API Security Token Access Key that is used to login to the system
 		password: the password or the OneVizion API Security Token Secret Key that is used to gain access to the system
-        logLevel: log level name (Info, Warning, Error, Debug) for logging integration actions
+		logLevel: log level name (Info, Warning, Error, Debug) for logging integration actions
 
-    Exception can be thrown for method 'add'
+	Exception can be thrown for method 'add'
 	"""
 
-    def __init__(self, processId, URL="", userName="", password="", paramToken=None, isTokenAuth=False, logLevelName=""):
-        self._URL = URL
-        self._userName = userName
-        self._password = password
-        self._processId = processId
+	def __init__(self, processId, URL="", userName="", password="", paramToken=None, isTokenAuth=False, logLevelName=""):
+		self._URL = URL
+		self._userName = userName
+		self._password = password
+		self._processId = processId
 
-        if paramToken is not None:
-            if self._URL == "":
-                self._URL = Config["ParameterData"][paramToken]['url']
-            if self._userName == "":
-                self._userName = Config["ParameterData"][paramToken]['UserName']
-            if self._password == "":
-                self._password = Config["ParameterData"][paramToken]['Password']
+		if paramToken is not None:
+			if self._URL == "":
+				self._URL = Config["ParameterData"][paramToken]['url']
+			if self._userName == "":
+				self._userName = Config["ParameterData"][paramToken]['UserName']
+			if self._password == "":
+				self._password = Config["ParameterData"][paramToken]['Password']
 
-        if isTokenAuth:
-            self._auth = HTTPBearerAuth(self._userName, self._password)
-        else:
-            self._auth = requests.auth.HTTPBasicAuth(self._userName, self._password)
+		if isTokenAuth:
+			self._auth = HTTPBearerAuth(self._userName, self._password)
+		else:
+			self._auth = requests.auth.HTTPBasicAuth(self._userName, self._password)
 
-        self._ovLogLevel = LogLevel.getLogLevelByName(logLevelName)
+		self._ovLogLevel = LogLevel.getLogLevelByName(logLevelName)
  
 
-    def add(self, logLevel, message, description=""):
-        if logLevel.logLevelId <= self._ovLogLevel.logLevelId:
-            parameters = {'message': message, 'description': description, 'log_level_name': logLevel.logLevelName}
-            jsonData = json.dumps(parameters)
-            headers = {'content-type': 'application/json'}
-            url_log = "https://{URL}/api/v3/integrations/runs/{ProcessID}/logs".format(URL=self._URL, ProcessID=self._processId)
-            OVCall = curl('POST', url_log, data=jsonData, headers=headers, auth=self._auth)
-            if len(OVCall.errors) > 0:
-                raise Exception(OVCall.errors)
-            return OVCall.jsonData
-    
+	def add(self, logLevel, message, description=""):
+		if logLevel.logLevelId <= self._ovLogLevel.logLevelId:
+			parameters = {'message': message, 'description': description, 'log_level_name': logLevel.logLevelName}
+			jsonData = json.dumps(parameters)
+			headers = {'content-type': 'application/json'}
+			url_log = "https://{URL}/api/v3/integrations/runs/{ProcessID}/logs".format(URL=self._URL, ProcessID=self._processId)
+			OVCall = curl('POST', url_log, data=jsonData, headers=headers, auth=self._auth)
+			if len(OVCall.errors) > 0:
+				raise Exception(OVCall.errors)
+			return OVCall.jsonData
+	
 
 class LogLevel(Enum):
-    """Enum contains possible log levels, as well as a static method to get the log level by name.
+	"""Enum contains possible log levels, as well as a static method to get the log level by name.
 
-    In method 'getLogLevelByName' an exception is thrown if the log level is not found.
-    """
-    
-    ERROR = (0, "Error")
-    WARNING = (1, "Warning")
-    INFO = (2, "Info")
-    DEBUG = (3, "Debug")
+	In method 'getLogLevelByName' an exception is thrown if the log level is not found.
+	"""
+	
+	ERROR = (0, "Error")
+	WARNING = (1, "Warning")
+	INFO = (2, "Info")
+	DEBUG = (3, "Debug")
 
-    def __init__(self, logLevelId, logLevelName):
-        self.logLevelId = logLevelId
-        self.logLevelName = logLevelName
-    
-    @staticmethod
-    def getLogLevelByName(ovLogLevelName):
-        for logLevel in list(LogLevel):
-            if logLevel.logLevelName.upper() == ovLogLevelName.upper():
-                return logLevel
-        raise Exception("Cannot find the log level called '{}'".format(ovLogLevelName))
+	def __init__(self, logLevelId, logLevelName):
+		self.logLevelId = logLevelId
+		self.logLevelName = logLevelName
+	
+	@staticmethod
+	def getLogLevelByName(ovLogLevelName):
+		for logLevel in list(LogLevel):
+			if logLevel.logLevelName.upper() == ovLogLevelName.upper():
+				return logLevel
+		raise Exception("Cannot find the log level called '{}'".format(ovLogLevelName))
 
 
 
