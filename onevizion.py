@@ -1408,6 +1408,7 @@ class EMail(object):
 		security: None, SSL, or STARTTLS
 		tls: True if TLS is needed, else false.  Provided for Backwards compatibility
 		userName: the "From" and login to the SMTP server
+		sender: can specify a from address that is different from userName
 		password: the password to conenct to the SMTP server
 		to: array of email addresses to send the message to
 		subject: subject of the message
@@ -1423,7 +1424,7 @@ class EMail(object):
 		self.tls = "False"
 		self.userName = ""
 		self.password = ""
-		self.from = ""
+		self.sender = ""
 		self.to = []
 		self.cc = []
 		self.subject = ""
@@ -1468,9 +1469,9 @@ class EMail(object):
 		if 'Security' in SMTP:
 			self.security = SMTP['Security']
 		if 'From' in SMTP:
-			self.from = SMTP['From']
+			self.sender = SMTP['From']
 		else:
-			self.from = SMTP['UserName']
+			self.sender = SMTP['UserName']
 		if 'To' in SMTP:
 			if type(SMTP['To']) is list:
 				self.to.extend(SMTP['To'])
@@ -1499,8 +1500,8 @@ class EMail(object):
 		from email.mime.text import MIMEText
 		msg = MIMEMultipart()
 		msg['To'] = ", ".join(self.to )
-		if self.from != '':
-			msg['From'] = self.from
+		if self.sender != '':
+			msg['From'] = self.sender
 		else:
 			msg['From'] = self.userName
 		msg['Subject'] = self.subject
@@ -1617,14 +1618,14 @@ class NotificationService(ABC):
             notifQueue = self._convertNotifQueueJsonToList(notifQueueJson)
         except Exception as e:
             self._integrationLog.add(LogLevel.ERROR, "Can't convert Notif Queue json data to list", str(e))
-            raise Exception("Can't convert Notif Queue json data to list") from e
+            raise Exception("Can't convert Notif Queue json data to list") #from e
 
         preparedNotifQueue = []
         try:
             preparedNotifQueue = self._prepareNotifQueue(notifQueue)
         except Exception as e:
             self._integrationLog.add(LogLevel.ERROR, "Can't prepare Notif Queue to send", str(e))
-            raise Exception("Can't prepare Notif Queue to send") from e
+            raise Exception("Can't prepare Notif Queue to send") #from e
 
         self._integrationLog.add(LogLevel.INFO, "Notif Queue size: [{}]".format(len(preparedNotifQueue)))
 
