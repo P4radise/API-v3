@@ -1578,7 +1578,7 @@ class EMail(object):
 		self.duration = delta.total_seconds()
 		Message("Sent Mail in {Duration} seconds.".format(Duration=self.duration),1)
 
-if Config["PythonVer"] == "3":
+if sys.version_info.major >= 3 and sys.version_info.minor >= 4:
 	from abc import ABC, abstractmethod
 	class NotificationService(ABC):
 		"""Wrapper for getting records from the notification queue and sending them somewhere.
