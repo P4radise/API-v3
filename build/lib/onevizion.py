@@ -1023,6 +1023,7 @@ class Import(object):
 		self.processId = None
 		self.status = None
 		self.processList = []
+		self.isTokenAuth = isTokenAuth
 		if paramToken is not None:
 			if self.URL is None:
 				self.URL = Config["ParameterData"][paramToken]['url']
@@ -1033,13 +1034,13 @@ class Import(object):
 
 		# If all info is filled out, go ahead and run the query.
 		if self.URL != None and self.userName != None and self.password != None and self.impSpecId != None and self.file != None:
-			if isTokenAuth:
-				self.auth = HTTPBearerAuth(self.userName, self.password)
-			else:
-				self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 			self.run()
 
 	def run(self):
+		if self.isTokenAuth:
+			self.auth = HTTPBearerAuth(self.userName, self.password)
+		else:
+			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 		self.ImportURL = "https://{URL}/api/v3/imports/{ImpSpecID}/run?action={Action}".format(
 			URL=self.URL,
 			ImpSpecID=self.impSpecId,
@@ -1092,6 +1093,10 @@ class Import(object):
 			PID = self.processId
 		else:
 			PID = ProcessID
+		if self.isTokenAuth:
+			self.auth = HTTPBearerAuth(self.userName, self.password)
+		else:
+			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 		self.ImportURL = "https://{URL}/api/v3/imports/runs/{ProcID}/interrupt".format(
 			URL=self.URL,
 			ProcID=PID
@@ -1135,6 +1140,10 @@ class Import(object):
 					self.ImportURL += "&"
 				self.ImportURL += paramName + "=" +URLEncode(str(param))
 
+		if self.isTokenAuth:
+			self.auth = HTTPBearerAuth(self.userName, self.password)
+		else:
+			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 		self.ImportURL = "https://{URL}/api/v3/imports/runs".format(
 			URL=self.URL
 			)
@@ -1225,6 +1234,7 @@ class Export(object):
 		self.processId = None
 		self.processList = []
 		self.content = None
+		self.isTokenAuth = isTokenAuth
 		if paramToken is not None:
 			if self.URL is None:
 				self.URL = Config["ParameterData"][paramToken]['url']
@@ -1235,13 +1245,13 @@ class Export(object):
 
 		# If all info is filled out, go ahead and run the query.
 		if self.URL is not None and self.userName is not None and self.password is not None and self.trackorType is not None and (self.viewOptions is not None or len(self.fields)>0 or self.fileFields is not None) and (self.filterOptions is not None or len(self.filters)>0):
-			if isTokenAuth:
-				self.auth = HTTPBearerAuth(self.userName, self.password)
-			else:
-				self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 			self.run()
 
 	def run(self):
+		if self.isTokenAuth:
+			self.auth = HTTPBearerAuth(self.userName, self.password)
+		else:
+			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 		self.ImportURL = "https://{URL}/api/v3/exports/{TrackorType}/run?export_mode={ExportMode}&delivery={Delivery}".format(
 			URL=self.URL,
 			TrackorType=self.trackorType,
@@ -1301,6 +1311,10 @@ class Export(object):
 			PID = self.processId
 		else:
 			PID = ProcessID
+		if self.isTokenAuth:
+			self.auth = HTTPBearerAuth(self.userName, self.password)
+		else:
+			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 		self.ImportURL = "https://{URL}/api/v3/exports/runs/{ProcID}/interrupt".format(
 			URL=self.URL,
 			ProcID=PID
@@ -1333,6 +1347,10 @@ class Export(object):
 			PID = self.processId
 		else:
 			PID = ProcessID
+		if self.isTokenAuth:
+			self.auth = HTTPBearerAuth(self.userName, self.password)
+		else:
+			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 		self.ImportURL = "https://{URL}/api/v3/exports/runs/{ProcID}".format(
 			URL=self.URL,
 			ProcID=PID
@@ -1366,6 +1384,10 @@ class Export(object):
 			PID = self.processId
 		else:
 			PID = ProcessID
+		if self.isTokenAuth:
+			self.auth = HTTPBearerAuth(self.userName, self.password)
+		else:
+			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
 		self.ImportURL = "https://{URL}/api/v3/exports/runs/{ProcID}/file".format(
 			URL=self.URL,
 			ProcID=PID
@@ -1578,7 +1600,7 @@ class EMail(object):
 		self.duration = delta.total_seconds()
 		Message("Sent Mail in {Duration} seconds.".format(Duration=self.duration),1)
 
-if Config["PythonVer"] == "3":
+if sys.version_info.major >= 3 and sys.version_info.minor >= 4:
 	from abc import ABC, abstractmethod
 	class NotificationService(ABC):
 		"""Wrapper for getting records from the notification queue and sending them somewhere.
