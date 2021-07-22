@@ -702,11 +702,14 @@ class Trackor(object):
 			Config["Error"]=True
 
 
-	def GetFile(self, trackorId, fieldName):
+	def GetFile(self, trackorId=None, fieldName=None, blobDataId=None):
 		""" Get a File from a particular Trackor record's particular Configured field
 
 			trackorID: the system ID for the particular Trackor record that this is being assigned to.
 			fieldName: should be the Configured Field Name, not the Label.
+			blobDataID: the blob_data_id from the blob_data table which may or may not be the current file in a field.
+
+			Use (trackorId and fieldName) or use (blobDataId).  Other combinations are not supported.
 		"""
 
 		def get_filename_from_cd(cd):
@@ -721,16 +724,27 @@ class Trackor(object):
 				return None
 			return fname[0]
 
-
-		URL = "https://{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
-				Website=self.URL,
-				TrackorID=trackorId,
-				ConfigFieldName=fieldName
-				)
 		self.errors = []
 		self.jsonData = {}
 
-		tmpFileName = str(trackorId)+fieldName+".tmp"
+		# check parameters and set URL
+		if trackorId and fieldName:
+			URL = "https://{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
+					Website=self.URL,
+					TrackorID=trackorId,
+					ConfigFieldName=fieldName
+					)
+			tmpFileName = str(trackorId)+fieldName+".tmp"
+		elif blobDataId:
+			URL = "https://{Website}/api/v3/files/{BlobDataID}".format(
+					Website=self.URL,
+					BlobDataID=blobDataId
+					)
+			tmpFileName = str(blobDataId)+".tmp"
+		else:
+			self.errors.append('Bad parameters.  Use (trackorId and fieldName) or use (blobDataId)')
+			return None
+
 		before = datetime.datetime.utcnow()
 		try:
 			# NOTE the stream=True parameter
