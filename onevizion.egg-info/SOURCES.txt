@@ -4,4 +4,5 @@ setup.py
 onevizion.egg-info/PKG-INFO
 onevizion.egg-info/SOURCES.txt
 onevizion.egg-info/dependency_links.txt
+onevizion.egg-info/requires.txt
 onevizion.egg-info/top_level.txt

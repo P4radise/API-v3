@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import os
+import sys
 from setuptools import setup, find_packages
 #from onevizion import __version__
-__version__ = '1.0.35'
+__version__ = '1.0.37'
 
 #following PyPI guide: https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
 
@@ -28,6 +29,7 @@ setup(name='onevizion',
 	"Operating System :: Unix",
 	"Programming Language :: Python",
 	],
+	install_requires=['requests'],
 	py_modules = ['onevizion'],
 
 	platforms=["Unix"],
