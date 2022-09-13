@@ -1854,7 +1854,7 @@ class IntegrationLog(object):
 	Exception can be thrown for method 'add'
 	"""
 
-	def __init__(self, processId, URL="", userName="", password="", paramToken=None, isTokenAuth=False, logLevelName=""):
+	def __init__(self, processId, URL="", userName="", password="", paramToken=None, isTokenAuth=False, logLevelName="Error"):
 		self._URL = URL
 		self._userName = userName
 		self._password = password
