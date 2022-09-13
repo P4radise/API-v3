@@ -56,6 +56,16 @@ def TraceMessage(Msg,Level=0,TraceTag=None):
 	Message(Msg,Level)
 	Config["Trace"][Tag]=Msg
 
+
+HTTPS = "https://"
+HTTP = "http://"
+
+def getUrlContainingScheme(url):
+	if not url:
+		return ""
+
+	return url if url.lower().startswith((HTTP, HTTPS)) else HTTPS + url
+
 class Singleton(object):
 	""" Make sure this process is only running once.  It does a quiet quit() if it's already running.
 		* May use any Lockfile name you like, default is ScriptName.lck.
@@ -349,6 +359,8 @@ class Trackor(object):
 			if self.password == "":
 				self.password = Config["ParameterData"][paramToken]['Password']
 
+		self.URL = getUrlContainingScheme(self.URL)
+
 		if isTokenAuth:
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
@@ -359,7 +371,7 @@ class Trackor(object):
 		"""
 		FilterSection = "trackor_id=" + str(trackorId)
 
-		URL = "https://{URL}/api/v3/trackor_types/{TrackorType}/trackors?{FilterSection}".format(URL=self.URL, TrackorType=self.TrackorType, FilterSection=FilterSection)
+		URL = "{URL}/api/v3/trackor_types/{TrackorType}/trackors?{FilterSection}".format(URL=self.URL, TrackorType=self.TrackorType, FilterSection=FilterSection)
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('DELETE',URL,auth=self.auth)
@@ -401,7 +413,7 @@ class Trackor(object):
 			fields is an array of strings that are the Configured Field Names.
 		"""
 
-		URL = "https://{Website}/api/v3/trackor_types/{TrackorType}/trackors".format(
+		URL = "{Website}/api/v3/trackor_types/{TrackorType}/trackors".format(
 			Website=self.URL,
 			TrackorType=self.TrackorType
 			)
@@ -426,7 +438,7 @@ class Trackor(object):
 				FilterSection = "filter="+URLEncode(filterOptions)
 		else:
 			#Filtering for specific TrackorID
-			URL = "https://{Website}/api/v3/trackors/{TrackorID}".format(
+			URL = "{Website}/api/v3/trackors/{TrackorID}".format(
 				Website=self.URL,
 				TrackorID=str(trackorId)
 				)
@@ -527,13 +539,13 @@ class Trackor(object):
 			for key,value in filters.items():
 				Filter = Filter + key + '=' + URLEncode(str(value)) + '&'
 			Filter = Filter.rstrip('?&')
-			URL = "https://{Website}/api/v3/trackor_types/{TrackorType}/trackors{Filter}".format(
+			URL = "{Website}/api/v3/trackor_types/{TrackorType}/trackors{Filter}".format(
 					Website=self.URL,
 					TrackorType=self.TrackorType,
 					Filter=Filter
 					)
 		else:
-			URL = "https://{Website}/api/v3/trackors/{TrackorID}".format(
+			URL = "{Website}/api/v3/trackors/{TrackorID}".format(
 					Website=self.URL,
 					TrackorID=trackorId
 					)
@@ -612,7 +624,7 @@ class Trackor(object):
 			JSONObj["parents"] = ParentsSection
 		JSON = json.dumps(JSONObj)
 
-		URL = "https://{URL}/api/v3/trackor_types/{TrackorType}/trackors".format(URL=self.URL, TrackorType=self.TrackorType)
+		URL = "{URL}/api/v3/trackor_types/{TrackorType}/trackors".format(URL=self.URL, TrackorType=self.TrackorType)
 
 		Headers = {'content-type': 'application/json'}
 		if charset != "":
@@ -654,7 +666,7 @@ class Trackor(object):
 			finishDate: if given will place the finish of the Workplan and backwards calculate dates.
 		"""
 
-		URL = "https://{website}/api/v3/trackors/{trackor_id}/assign_wp?workplan_template={workplan_template}".format(
+		URL = "{website}/api/v3/trackors/{trackor_id}/assign_wp?workplan_template={workplan_template}".format(
 				website=self.URL,
 				trackor_id=trackorId,
 				workplan_template=workplanTemplate
@@ -729,14 +741,14 @@ class Trackor(object):
 
 		# check parameters and set URL
 		if trackorId and fieldName:
-			URL = "https://{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
+			URL = "{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
 					Website=self.URL,
 					TrackorID=trackorId,
 					ConfigFieldName=fieldName
 					)
 			tmpFileName = str(trackorId)+fieldName+".tmp"
 		elif blobDataId:
-			URL = "https://{Website}/api/v3/files/{BlobDataID}".format(
+			URL = "{Website}/api/v3/files/{BlobDataID}".format(
 					Website=self.URL,
 					BlobDataID=blobDataId
 					)
@@ -800,7 +812,7 @@ class Trackor(object):
 			newFileName: Optional, rename file when uploading.
 		"""
 
-		URL = "https://{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
+		URL = "{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
 				Website=self.URL,
 				TrackorID=trackorId,
 				ConfigFieldName=fieldName
@@ -873,6 +885,8 @@ class WorkPlan(object):
 			if self.password == "":
 				self.password = Config["ParameterData"][paramToken]['Password']
 
+		self.URL = getUrlContainingScheme(self.URL)
+
 		if isTokenAuth:
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
@@ -892,9 +906,9 @@ class WorkPlan(object):
 				)
 		else:
 			#1234
-			FilterSection = str(trackorId)
+			FilterSection = str(workplanId)
 
-		URL = "https://{URL}/api/v3/wps/{FilterSection}".format(URL=self.URL, FilterSection=FilterSection)
+		URL = "{URL}/api/v3/wps/{FilterSection}".format(URL=self.URL, FilterSection=FilterSection)
 		self.errors = []
 		self.jsonData = {}
 		self.OVCall = curl('GET',URL,auth=self.auth)
@@ -935,6 +949,8 @@ class Task(object):
 			if self.password == "":
 				self.password = Config["ParameterData"][paramToken]['Password']
 
+		self.URL = getUrlContainingScheme(self.URL)
+
 		if isTokenAuth:
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
@@ -945,11 +961,11 @@ class Task(object):
 			identified either by workplanId, workplanId and orderNumber or by a taskId
 		"""
 		if taskId is not None:
-			URL = "https://{URL}/api/v3/tasks/{TaskID}".format(URL=self.URL, TaskID=taskId)
+			URL = "{URL}/api/v3/tasks/{TaskID}".format(URL=self.URL, TaskID=taskId)
 		elif orderNumber is not None:
-			URL = "https://{URL}/api/v3/tasks?workplan_id={WorkPlanID}&order_number={OrderNumber}".format(URL=self.URL, WorkPlanID=workplanId, OrderNumber=orderNumber)
+			URL = "{URL}/api/v3/tasks?workplan_id={WorkPlanID}&order_number={OrderNumber}".format(URL=self.URL, WorkPlanID=workplanId, OrderNumber=orderNumber)
 		else:
-			URL = "https://{URL}/api/v3/wps/{WorkPlanID}/tasks".format(URL=self.URL, WorkPlanID=workplanId)
+			URL = "{URL}/api/v3/wps/{WorkPlanID}/tasks".format(URL=self.URL, WorkPlanID=workplanId)
 
 		self.errors = []
 		self.jsonData = {}
@@ -980,7 +996,7 @@ class Task(object):
 
 		JSON = json.dumps(fields)
 
-		URL = "https://{URL}/api/v3/tasks/{TaskID}".format(URL=self.URL, TaskID=taskId)
+		URL = "{URL}/api/v3/tasks/{TaskID}".format(URL=self.URL, TaskID=taskId)
 		#payload = open('temp_payload.json','rb')
 		Headers = {'content-type': 'application/x-www-form-urlencoded'}
 		self.errors = []
@@ -1046,6 +1062,8 @@ class Import(object):
 			if self.password is None:
 				self.password = Config["ParameterData"][paramToken]['Password']
 
+		self.URL = getUrlContainingScheme(self.URL)
+
 		# If all info is filled out, go ahead and run the query.
 		if self.URL != None and self.userName != None and self.password != None and self.impSpecId != None and self.file != None:
 			self.run()
@@ -1055,7 +1073,7 @@ class Import(object):
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
 			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
-		self.ImportURL = "https://{URL}/api/v3/imports/{ImpSpecID}/run?action={Action}".format(
+		self.ImportURL = "{URL}/api/v3/imports/{ImpSpecID}/run?action={Action}".format(
 			URL=self.URL,
 			ImpSpecID=self.impSpecId,
 			Action=self.action
@@ -1111,7 +1129,7 @@ class Import(object):
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
 			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
-		self.ImportURL = "https://{URL}/api/v3/imports/runs/{ProcID}/interrupt".format(
+		self.ImportURL = "{URL}/api/v3/imports/runs/{ProcID}/interrupt".format(
 			URL=self.URL,
 			ProcID=PID
 			)
@@ -1158,7 +1176,7 @@ class Import(object):
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
 			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
-		self.ImportURL = "https://{URL}/api/v3/imports/runs".format(
+		self.ImportURL = "{URL}/api/v3/imports/runs".format(
 			URL=self.URL
 			)
 		if status is not None or comments is not None or importName is not None or owner is not None or isPdf is not None:
@@ -1257,6 +1275,8 @@ class Export(object):
 			if self.password is None:
 				self.password = Config["ParameterData"][paramToken]['Password']
 
+		self.URL = getUrlContainingScheme(self.URL)
+
 		# If all info is filled out, go ahead and run the query.
 		if self.URL is not None and self.userName is not None and self.password is not None and self.trackorType is not None and (self.viewOptions is not None or len(self.fields)>0 or self.fileFields is not None) and (self.filterOptions is not None or len(self.filters)>0):
 			self.run()
@@ -1266,7 +1286,7 @@ class Export(object):
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
 			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
-		self.ImportURL = "https://{URL}/api/v3/exports/{TrackorType}/run?export_mode={ExportMode}&delivery={Delivery}".format(
+		self.ImportURL = "{URL}/api/v3/exports/{TrackorType}/run?export_mode={ExportMode}&delivery={Delivery}".format(
 			URL=self.URL,
 			TrackorType=self.trackorType,
 			ExportMode=self.exportMode,
@@ -1329,7 +1349,7 @@ class Export(object):
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
 			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
-		self.ImportURL = "https://{URL}/api/v3/exports/runs/{ProcID}/interrupt".format(
+		self.ImportURL = "{URL}/api/v3/exports/runs/{ProcID}/interrupt".format(
 			URL=self.URL,
 			ProcID=PID
 			)
@@ -1365,7 +1385,7 @@ class Export(object):
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
 			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
-		self.ImportURL = "https://{URL}/api/v3/exports/runs/{ProcID}".format(
+		self.ImportURL = "{URL}/api/v3/exports/runs/{ProcID}".format(
 			URL=self.URL,
 			ProcID=PID
 			)
@@ -1402,7 +1422,7 @@ class Export(object):
 			self.auth = HTTPBearerAuth(self.userName, self.password)
 		else:
 			self.auth = requests.auth.HTTPBasicAuth(self.userName, self.password)
-		self.ImportURL = "https://{URL}/api/v3/exports/runs/{ProcID}/file".format(
+		self.ImportURL = "{URL}/api/v3/exports/runs/{ProcID}/file".format(
 			URL=self.URL,
 			ProcID=PID
 			)
@@ -1761,6 +1781,8 @@ if sys.version_info.major >= 3 and sys.version_info.minor >= 4:
 				if self._password == "":
 					self._password = Config["ParameterData"][paramToken]['Password']
 
+			self._URL = getUrlContainingScheme(self._URL)
+
 			if isTokenAuth:
 				self._auth = HTTPBearerAuth(self._userName, self._password)
 			else:
@@ -1768,20 +1790,20 @@ if sys.version_info.major >= 3 and sys.version_info.minor >= 4:
 
 
 		def getNotifQueue(self):
-			URL = "https://{URL}/api/internal/notif/queue?service_id={ServiceID}".format(URL=self._URL, ServiceID=self._serviceId)
+			URL = "{URL}/api/internal/notif/queue?service_id={ServiceID}".format(URL=self._URL, ServiceID=self._serviceId)
 			OVCall = curl('GET', URL, headers=self._headers, auth=self._auth)
 			if len(OVCall.errors) > 0:
 				raise Exception(OVCall.errors)
 			return OVCall.jsonData
 
 		def updateNotifQueueRecStatusById(self, notifQueueRecId, status):
-			URL = "https://{URL}/api/internal/notif/queue/{notifQueueRecId}/update_status?status={status}".format(URL=self._URL, notifQueueRecId=notifQueueRecId, status=status)
+			URL = "{URL}/api/internal/notif/queue/{notifQueueRecId}/update_status?status={status}".format(URL=self._URL, notifQueueRecId=notifQueueRecId, status=status)
 			OVCall = curl('PATCH', URL, headers=self._headers, auth=self._auth)
 			if len(OVCall.errors) > 0:
 				raise Exception(OVCall.errors)
 
 		def addNewAttempt(self, notifQueueRecId, errorMessage):
-			URL = "https://{URL}/api/internal/notif/queue/{notifQueueRecId}/attempts?error_code={errorMessage}".format(URL=self._URL, notifQueueRecId=notifQueueRecId, errorMessage=errorMessage)
+			URL = "{URL}/api/internal/notif/queue/{notifQueueRecId}/attempts?error_code={errorMessage}".format(URL=self._URL, notifQueueRecId=notifQueueRecId, errorMessage=errorMessage)
 			OVCall = curl('POST', URL, headers=self._headers, auth=self._auth)
 			if len(OVCall.errors) > 0:
 				raise Exception(OVCall.errors)
@@ -1832,7 +1854,7 @@ class IntegrationLog(object):
 	Exception can be thrown for method 'add'
 	"""
 
-	def __init__(self, processId, URL="", userName="", password="", paramToken=None, isTokenAuth=False, logLevelName=""):
+	def __init__(self, processId, URL="", userName="", password="", paramToken=None, isTokenAuth=False, logLevelName="Error"):
 		self._URL = URL
 		self._userName = userName
 		self._password = password
@@ -1845,6 +1867,8 @@ class IntegrationLog(object):
 				self._userName = Config["ParameterData"][paramToken]['UserName']
 			if self._password == "":
 				self._password = Config["ParameterData"][paramToken]['Password']
+
+		self._URL = getUrlContainingScheme(self._URL)
 
 		if isTokenAuth:
 			self._auth = HTTPBearerAuth(self._userName, self._password)
@@ -1859,7 +1883,7 @@ class IntegrationLog(object):
 			parameters = {'message': message, 'description': description, 'log_level_name': logLevel.logLevelName}
 			jsonData = json.dumps(parameters)
 			headers = {'content-type': 'application/json'}
-			url_log = "https://{URL}/api/v3/integrations/runs/{ProcessID}/logs".format(URL=self._URL, ProcessID=self._processId)
+			url_log = "{URL}/api/v3/integrations/runs/{ProcessID}/logs".format(URL=self._URL, ProcessID=self._processId)
 			OVCall = curl('POST', url_log, data=jsonData, headers=headers, auth=self._auth)
 			if len(OVCall.errors) > 0:
 				raise Exception(OVCall.errors)
