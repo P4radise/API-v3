@@ -906,7 +906,7 @@ class WorkPlan(object):
 				)
 		else:
 			#1234
-			FilterSection = str(trackorId)
+			FilterSection = str(workplanId)
 
 		URL = "{URL}/api/v3/wps/{FilterSection}".format(URL=self.URL, FilterSection=FilterSection)
 		self.errors = []
