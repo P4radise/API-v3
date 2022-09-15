@@ -1,8 +1,11 @@
 import requests
+import json
+from datetime import datetime
 from onevizion.util import *
 from onevizion.curl import curl
 from onevizion.httpbearer import HTTPBearerAuth
 from onevizion.EMail import EMail
+import onevizion
 
 class OVImport(object):
 	"""Wrapper for calling OneVizion Imports.  We have the
@@ -41,11 +44,11 @@ class OVImport(object):
 
 		if paramToken is not None:
 			if self.URL is None:
-				self.URL = Config["ParameterData"][paramToken]['url']
+				self.URL = onevizion.Config["ParameterData"][paramToken]['url']
 			if self.userName is None:
-				self.userName = Config["ParameterData"][paramToken]['UserName']
+				self.userName = onevizion.Config["ParameterData"][paramToken]['UserName']
 			if self.password is None:
-				self.password = Config["ParameterData"][paramToken]['Password']
+				self.password = onevizion.Config["ParameterData"][paramToken]['Password']
 
 		# If all info is filled out, go ahead and run the query.
 		if self.URL != None and self.userName != None and self.password != None and self.impSpecId != None and self.file != None:
