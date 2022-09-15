@@ -30,7 +30,7 @@ setup(name='onevizion',
 	"Programming Language :: Python",
 	],
 	install_requires=['requests'],
-	packages = ['onevizion', 'onevizion.integration','onevizion.notif'],
+	packages = find_packages(),
 	platforms=["Unix"],
 	license="MIT",
 	description="onevizion wraps the version 3 API for a OneVizion system, and provides a few optional other utilities."
