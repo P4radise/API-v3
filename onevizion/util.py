@@ -1,6 +1,7 @@
 import urllib
 import os
 import json
+import base64
 from datetime import datetime, date
 import onevizion
 

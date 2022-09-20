@@ -1,7 +1,9 @@
+import requests
+import json
 from onevizion.util import *
 from onevizion.curl import curl
-import json
-from onevizion.integration.loglevel import LogLevel
+from onevizion.integration.loglevel import 
+from onevizion.httpbearer import HTTPBearerAuth
 import onevizion
 
 class IntegrationLog(object):

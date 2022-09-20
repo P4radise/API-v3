@@ -1,11 +1,5 @@
-import requests
-import json
-from datetime import datetime
-from onevizion.util import *
-from onevizion.curl import curl
-from onevizion.httpbearer import HTTPBearerAuth
-from onevizion.EMail import EMail
 import onevizion
+from onevizion.Import import Import
 
 class OVImport(object):
 	"""Wrapper for calling OneVizion Imports.  We have the

@@ -1,5 +1,7 @@
+import requests
 from onevizion.util import *
 from onevizion.curl import curl
+from onevizion.httpbearer import HTTPBearerAuth
 from onevizion.notif.queuerecord import NotifQueueRecord
 from onevizion.notif.queuestatus import NotifQueueStatus
 import onevizion

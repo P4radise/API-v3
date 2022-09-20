@@ -5,6 +5,7 @@ from onevizion.integration.loglevel import LogLevel
 from onevizion.notif.queue import NotifQueue
 from onevizion.notif.queuerecord import NotifQueueRecord
 from onevizion.notif.queuestatus import NotifQueueStatus
+import time
 
 class NotificationService(ABC):
 	"""Wrapper for getting records from the notification queue and sending them somewhere.
