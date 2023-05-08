@@ -63,15 +63,17 @@ class Task(object):
 				TraceMessage("Errors:\n{Errors}".format(Errors=json.dumps(self.OVCall.errors,indent=2)),0,TraceTag+"-Errors")
 			onevizion.Config["Error"]=True
 
-	def update(self, method='PUT', taskId, fields={}, dynamicDates=[]):
-		""" method = 'PUT':
-			This endpoint doesn't support partial update, so you should pass whole Task json object.
+	def updatePartial(self, taskId, fields, dynamicDates):
+		"""Update Task Partial"""
+		self._update('PATCH', taskId, fields, dynamicDates)
+
+	def update(self, method, taskId, fields, dynamicDates):
+		""" This endpoint doesn't support partial update, so you should pass whole Task json object.
 			Missed Task json object fields will be set to null.
-
-			method = 'PATCH':
-			Update Task Partial
 		"""
+		self._update('PUT', taskId, fields, dynamicDates)
 
+	def _update(self, method, taskId, fields={}, dynamicDates=[]):
 		if len(dynamicDates)>0:
 			fields['dynamic_dates'] = dynamicDates
 
