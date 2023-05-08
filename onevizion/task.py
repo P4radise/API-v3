@@ -67,7 +67,7 @@ class Task(object):
 		"""Update Task Partial"""
 		self._update('PATCH', taskId, fields, dynamicDates)
 
-	def update(self, method, taskId, fields, dynamicDates):
+	def update(self, taskId, fields, dynamicDates):
 		""" This endpoint doesn't support partial update, so you should pass whole Task json object.
 			Missed Task json object fields will be set to null.
 		"""
