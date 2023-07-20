@@ -484,26 +484,28 @@ class Trackor(object):
 
 
 
-	def UploadFile(self, trackorId, fieldName, fileName, newFileName=None):
+	def UploadFile(self, trackorId, fieldName, fileName, newFileName=None, byteString=None):
 		""" Get a File from a particular Trackor record's particular Configured field
 
 			trackorID: the system ID for the particular Trackor record that this is being assigned to.
 			fieldName: should be the Configured Field Name, not the Label.
-			fileName: path and file name to file you want to upload
+			fileName: path and file name to file you want to upload, or this is the file name if byteString has a value.
 			newFileName: Optional, rename file when uploading.
+			byteString: byte string of the file you want to upload.
 		"""
+		FilePath = fileName
+		FileName = newFileName if newFileName else os.path.basename(FilePath)
+
+		ByteString = byteString if byteString else open(FilePath, 'rb')
+		File = {'file': (FileName, ByteString)}
 
 		URL = "{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
 				Website=self.URL,
 				TrackorID=trackorId,
 				ConfigFieldName=fieldName
 				)
-		if newFileName is not None:
-			URL += "?file_name="+URLEncode(newFileName)
-			File = {'file': (os.path.basename(newFileName), open(fileName, 'rb'))}
-		else:
-			URL += "?file_name="+URLEncode(os.path.basename(fileName))
-			File = {'file': (os.path.basename(fileName), open(fileName, 'rb'))}
+
+		URL += "?file_name=" + URLEncode(FileName)
 
 		self.errors = []
 		self.jsonData = {}
@@ -512,7 +514,7 @@ class Trackor(object):
 		self.request = self.OVCall.request
 
 		Message(URL,2)
-		Message("FileName: {FileName}".format(FileName=fileName),2)
+		Message("FilePath: {FilePath}".format(FilePath=FilePath),2)
 		Message("{TrackorType} upload file completed in {Duration} seconds.".format(
 			TrackorType=self.TrackorType,
 			Duration=self.OVCall.duration
@@ -522,7 +524,7 @@ class Trackor(object):
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f'))
 			self.TraceTag = TraceTag
 			onevizion.Config["Trace"][TraceTag+"-URL"] = URL
-			onevizion.Config["Trace"][TraceTag+"-FileName"] = fileName
+			onevizion.Config["Trace"][TraceTag+"-FileName"] = FilePath
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
