@@ -484,19 +484,32 @@ class Trackor(object):
 
 
 
-	def UploadFile(self, trackorId, fieldName, fileName, newFileName=None, byteString=None):
+	def UploadFile(self, trackorId, fieldName, fileName=None, newFileName=None, byteString=None):
 		""" Get a File from a particular Trackor record's particular Configured field
 
 			trackorID: the system ID for the particular Trackor record that this is being assigned to.
 			fieldName: should be the Configured Field Name, not the Label.
-			fileName: path and file name to file you want to upload, or this is the file name if byteString has a value.
-			newFileName: Optional, rename file when uploading.
+			fileName: path and file name to file you want to upload.
+			newFileName: is required file name if byteString is present,
+			  	if the path to the file (fileName) is present - optional, rename the file when uploading.
 			byteString: byte string of the file you want to upload.
 		"""
-		FilePath = fileName
-		FileName = newFileName if newFileName else os.path.basename(FilePath)
 
-		ByteString = byteString if byteString else open(FilePath, 'rb')
+		if not fileName and not byteString:
+			self.errors.append("File path (fieldName) or byteString must be passed to the method")
+			return
+		elif byteString and not newFileName:
+			self.errors.append("The newFileName must be passed to the method if a byteString is passed")
+			return
+
+		if byteString:
+			FileName = newFileName
+			ByteString = byteString
+		else:
+			FilePath = fileName
+			FileName = newFileName if newFileName else os.path.basename(FilePath)
+			ByteString = open(FilePath, 'rb')
+
 		File = {'file': (FileName, ByteString)}
 
 		URL = "{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
@@ -514,7 +527,7 @@ class Trackor(object):
 		self.request = self.OVCall.request
 
 		Message(URL,2)
-		Message("FilePath: {FilePath}".format(FilePath=FilePath),2)
+		Message("FileName: {FileName}".format(FileName=newFileName if byteString else fileName),2)
 		Message("{TrackorType} upload file completed in {Duration} seconds.".format(
 			TrackorType=self.TrackorType,
 			Duration=self.OVCall.duration
@@ -524,7 +537,7 @@ class Trackor(object):
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f'))
 			self.TraceTag = TraceTag
 			onevizion.Config["Trace"][TraceTag+"-URL"] = URL
-			onevizion.Config["Trace"][TraceTag+"-FileName"] = FilePath
+			onevizion.Config["Trace"][TraceTag+"-FileName"] = newFileName if byteString else fileName
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
