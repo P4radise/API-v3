@@ -232,7 +232,7 @@ class Trackor(object):
 					)
 			JSON = json.dumps(FieldsSection)
 
-		Headers = {'content-type': 'application/x-www-form-urlencoded'}
+		Headers = {'content-type': 'application/json'}
 		if charset != "":
 			Headers['charset'] = charset
 		self.errors = []
