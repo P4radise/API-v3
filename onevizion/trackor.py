@@ -494,19 +494,16 @@ class Trackor(object):
 			  	if the path to the file (fileName) is present - optional, rename the file when uploading.
 			byteString: byte string of the file you want to upload.
 		"""
+		FilePath = fileName
 
-		if not fileName and not byteString:
-			self.errors.append("File path (fieldName) or byteString must be passed to the method")
-			return
-		elif byteString and not newFileName:
-			self.errors.append("The newFileName must be passed to the method if a byteString is passed")
+		if not(FilePath or byteString and newFileName):
+			self.errors.append("Either 'fileName' or 'newFileName' and 'byteString' are required")
 			return
 
-		if byteString:
+		if byteString and newFileName:
 			FileName = newFileName
 			ByteString = byteString
 		else:
-			FilePath = fileName
 			FileName = newFileName if newFileName else os.path.basename(FilePath)
 			ByteString = open(FilePath, 'rb')
 
@@ -527,7 +524,8 @@ class Trackor(object):
 		self.request = self.OVCall.request
 
 		Message(URL,2)
-		Message("FileName: {FileName}".format(FileName=newFileName if byteString else fileName),2)
+		Message("FilePath: {FilePath}".format(FilePath=FilePath),2)
+		Message("FileName: {FileName}".format(FileName=newFileName),2)
 		Message("{TrackorType} upload file completed in {Duration} seconds.".format(
 			TrackorType=self.TrackorType,
 			Duration=self.OVCall.duration
@@ -537,7 +535,8 @@ class Trackor(object):
 			TraceTag="{TimeStamp}:".format(TimeStamp=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f'))
 			self.TraceTag = TraceTag
 			onevizion.Config["Trace"][TraceTag+"-URL"] = URL
-			onevizion.Config["Trace"][TraceTag+"-FileName"] = newFileName if byteString else fileName
+			onevizion.Config["Trace"][TraceTag+"-FilePath"] = FilePath
+			onevizion.Config["Trace"][TraceTag+"-FileName"] = newFileName
 			try:
 				TraceMessage("Status Code: {StatusCode}".format(StatusCode=self.OVCall.request.status_code),0,TraceTag+"-StatusCode")
 				TraceMessage("Reason: {Reason}".format(Reason=self.OVCall.request.reason),0,TraceTag+"-Reason")
