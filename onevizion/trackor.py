@@ -485,7 +485,7 @@ class Trackor(object):
 
 
 	def UploadFile(self, trackorId, fieldName, fileName, newFileName=None):
-		""" Get a File from a particular Trackor record's particular Configured field
+		""" Upload a file to a particular Trackor record's particular Configured field
 
 			trackorId: the system ID for the particular Trackor record that this is being assigned to.
 			fieldName: should be the Configured Field Name, not the Label.
@@ -503,12 +503,12 @@ class Trackor(object):
 
 
 	def UploadFileByFileContents(self, trackorId, fieldName, fileName, fileContents):
-		""" Get a File from a particular Trackor record's particular Configured field
+		""" Upload a file to a particular Trackor record's particular Configured field
 
 			trackorID: the system ID for the particular Trackor record that this is being assigned to.
 			fieldName: should be the Configured Field Name, not the Label.
 			fileName: name of the file you want to upload.
-			fileContents: byte string or BufferdReadeer of the file you want to upload.
+			fileContents: byte string or BufferedReader of the file you want to upload.
 		"""
 
 		URL = "{Website}/api/v3/trackor/{TrackorID}/file/{ConfigFieldName}".format(
