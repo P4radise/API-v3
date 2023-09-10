@@ -337,7 +337,7 @@ class Trackor(object):
 			onevizion.Config["Error"]=True
 
 
-	def assignWorkplan(self,trackorId, workplanTemplate, name=None, startDate=None, finishDate=None):
+	def assignWorkplan(self, trackorId, workplanTemplate, name=None, isActive=False, startDate=None, finishDate=None):
 		""" Assign a Workplan to a given Trackor Record.
 
 			trackorID: the system ID for the particular Trackor record that this is being assigned to.
@@ -347,28 +347,29 @@ class Trackor(object):
 			finishDate: if given will place the finish of the Workplan and backwards calculate dates.
 		"""
 
-		URL = "{website}/api/v3/trackors/{trackor_id}/assign_wp?workplan_template={workplan_template}".format(
+		URL = "{website}/api/v3/trackors/{trackor_id}/assign_wp?workplan_template={workplan_template}&is_active={is_active}".format(
 				website=self.URL,
 				trackor_id=trackorId,
-				workplan_template=workplanTemplate
+				workplan_template=workplanTemplate,
+				is_active=isActive
 				)
 
 		if name is not None:
-			URL += "&"+URLEncode(name)
+			URL += "&name="+URLEncode(name)
 
 		if startDate is not None:
-			if isinstance(startDate, (datetime,datetime.date)):
+			if isinstance(startDate, datetime):
 				dt = startDate.strftime('%Y-%m-%d')
 			else:
 				dt = str(startDate)
-			URL += "&"+URLEncode(dt)
+			URL += "&proj_start_date="+URLEncode(dt)
 
 		if finishDate is not None:
-			if isinstance(finishDate, (datetime,datetime.date)):
+			if isinstance(finishDate, datetime):
 				dt = finishDate.strftime('%Y-%m-%d')
 			else:
 				dt = str(finishDate)
-			URL += "&"+URLEncode(dt)
+			URL += "&proj_finish_date="+URLEncode(dt)
 
 		self.errors = []
 		self.jsonData = {}
