@@ -343,6 +343,7 @@ class Trackor(object):
 			trackorID: the system ID for the particular Trackor record that this is being assigned to.
 			workplanTemplate: the name of the Workplan Template to assign
 			name: Name given to the newly created Workplan instance, by default it is the WPTemplate name
+			isActive: Makes Workplan active if True, otherwise False. The default value is False.
 			startDate: if given will set the Start Date of the Workplan and calculate baseline dates
 			finishDate: if given will place the finish of the Workplan and backwards calculate dates.
 		"""
