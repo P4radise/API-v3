@@ -64,7 +64,7 @@ from onevizion.export import Export
 
 from onevizion.EMail import EMail
 
-from onevizion.module.log import IntegrationLog
+from onevizion.module.log import IntegrationLog, ModuleLog
 from onevizion.module.loglevel import LogLevel
 
 if sys.version_info.major >= 3 and sys.version_info.minor >= 4:
