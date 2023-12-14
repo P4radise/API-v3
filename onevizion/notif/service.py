@@ -1,7 +1,7 @@
 from onevizion.util import *
 from abc import ABC, abstractmethod
-from onevizion.integration.log import IntegrationLog
-from onevizion.integration.loglevel import LogLevel
+from onevizion.module.log import IntegrationLog
+from onevizion.module.loglevel import LogLevel
 from onevizion.notif.queue import NotifQueue
 from onevizion.notif.queuerecord import NotifQueueRecord
 from onevizion.notif.queuestatus import NotifQueueStatus
