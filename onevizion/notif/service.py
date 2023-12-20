@@ -42,7 +42,7 @@ class NotificationService(ABC):
 		return object.__getattribute__(self, item)
 
 	def start(self):
-		self._moduleLog.add(LogLevel.INFO, "Starting Integration")
+		self._moduleLog.add(LogLevel.INFO, "Starting Module")
 		attempts = 0
 
 		self._moduleLog.add(LogLevel.INFO, "Receiving Notif Queue")
@@ -110,7 +110,7 @@ class NotificationService(ABC):
 										  "Can't send [{}] notifications. All attempts have been exhausted.".format(
 											  len(preparedNotifQueue)))
 
-		self._moduleLog.add(LogLevel.INFO, "Integration has been completed")
+		self._moduleLog.add(LogLevel.INFO, "Module has been completed")
 
 	@staticmethod
 	def _convertNotifQueueJsonToList(jsonData):
