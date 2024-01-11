@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?><COMPONENTS author="ov-python-api-samples_admin" description="" name="040.Rules.xml" site="https&#x3a;&#x2f;&#x2f;integrations.onevizion.com" ts="" ><RULES>
+ <RULES_ITEM>
+  <IS_ASYNC>0</IS_ASYNC>
+  <IS_ENABLED>1</IS_ENABLED>
+  <RULE>VHMPYAPI_DATA_PREPARATION</RULE>
+  <RULE_CLASS_ID>1</RULE_CLASS_ID>
+  <RULE_ID>100007103</RULE_ID>
+  <RULE_TYPE>
+   <RULE_TYPE_ID>120</RULE_TYPE_ID>
+   <RULE_TYPE>Before Module Start</RULE_TYPE>
+   <ID_FIELD>MODULE_RUN_ID</ID_FIELD>
+   <TEMPLATE_SQL>select module_id as &quot;id&quot;, module_name as &quot;Module Name&quot;, module_id as &quot;Module ID&quot; from module</TEMPLATE_SQL>
+   <TYPE_LABELS>
+    <T_LABEL>
+     <APP_LANG_ID>0</APP_LANG_ID>
+     <APP_LABEL_ID>6499</APP_LABEL_ID>
+     <LABEL_TEXT>Module Started (Before)</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>1</APP_LANG_ID>
+     <APP_LABEL_ID>6499</APP_LABEL_ID>
+     <LABEL_TEXT>Module Started (Before)</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>5</APP_LANG_ID>
+     <APP_LABEL_ID>6499</APP_LABEL_ID>
+     <LABEL_TEXT>Module Started (Before)</LABEL_TEXT>
+    </T_LABEL>
+   </TYPE_LABELS>
+   <DESC_LABELS>
+    <T_LABEL>
+     <APP_LANG_ID>0</APP_LANG_ID>
+     <APP_LABEL_ID>6500</APP_LABEL_ID>
+     <LABEL_TEXT>Executed when a Module is started</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>1</APP_LANG_ID>
+     <APP_LABEL_ID>6500</APP_LABEL_ID>
+     <LABEL_TEXT>Executed when a Module is started</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>5</APP_LANG_ID>
+     <APP_LABEL_ID>6500</APP_LABEL_ID>
+     <LABEL_TEXT>Executed when a Module is started</LABEL_TEXT>
+    </T_LABEL>
+   </DESC_LABELS>
+  </RULE_TYPE>
+  <SQL_TEXT>declare
+    v_delete_trackor_1_id xitor.xitor_id%type;
+    v_update_trackor_1_id xitor.xitor_id%type;
+    v_upload_file_by_file_contents_1_id xitor.xitor_id%type;
+    v_upload_file_1_id xitor.xitor_id%type;
+    v_update_task_1_id xitor.xitor_id%type;
+    v_wp_workplan_id wp_workplan.wp_workplan_id%type;
+    v_ret_str varchar2 (4000);
+    
+    procedure remove_trackors(
+        p_trackor_type_id in xitor.xitor_type_id%type,
+        p_trackor_key_match in varchar2)
+    as
+    begin
+        
+        for rec in (select xitor_id
+                      from xitor
+                     where xitor_type_id = p_trackor_type_id
+                       and xitor_key like &apos;&apos; || p_trackor_key_match)
+        loop
+            util.droptrackor(rec.xitor_id);
+        end loop;
+    end remove_trackors;
+    
+    procedure remove_assigned_wp(
+        p_trackor_type_id in xitor.xitor_type_id%type,
+        p_trackor_key in xitor.xitor_key%type)
+    as
+        v_wp_workplan_id wp_workplan.wp_workplan_id%type;
+    begin
+        
+        for rec in (select wpw.wp_workplan_id &quot;WP_ID&quot;
+                      from xitor x
+                      join wp_workplan wpw on wpw.xitor_id = x.xitor_id
+                                          and x.xitor_type_id = p_trackor_type_id
+                                          and x.xitor_key = p_trackor_key)
+        loop
+            v_wp_workplan_id := pkg_wp.drop_wp(rec.wp_id);
+        end loop;
+    end remove_assigned_wp;
+
+begin
+    remove_trackors(id.vhmpyapi_parenttrackor.tt, &apos;Create-Parent-Trackor-%&apos;);
+    remove_trackors(id.vhmpyapi_parenttrackor.tt, &apos;Import-Parent-Trackor-%&apos;);
+    remove_trackors(id.vhmpyapi_parenttrackor.tt, &apos;Import-Parent-Interrupt-%&apos;);
+    remove_trackors(id.vhmpyapi_parenttrackor.tt, &apos;Delete-Trackor-%&apos;);
+    remove_trackors(id.vhmpyapi_childtrackor.tt, &apos;Import-Child-Trackor-%&apos;);
+
+    v_delete_trackor_1_id := util.newtrackor(id.vhmpyapi_parenttrackor.tt, &apos;Delete-Trackor-1&apos;);
+    
+    v_update_trackor_1_id := util.gettrackorid(&apos;Update-Trackor-1&apos;, &apos;vhmpyapi_parenttrackor&apos;);
+    util.setvalcharbyid(v_update_trackor_1_id, id.vhmpyapi_parenttrackor.cf.pyapi_pt_text, &apos;Update-Trackor-Text-Value-1&apos;);
+    util.setvalnumbyid(v_update_trackor_1_id, id.vhmpyapi_parenttrackor.cf.pyapi_pt_number, 123);
+    util.deleteefile(v_update_trackor_1_id, id.vhmpyapi_parenttrackor.cf.pyapi_pt_efile);
+    
+    v_upload_file_by_file_contents_1_id := util.gettrackorid(&apos;Upload-File-By-File-Contents-1&apos;, &apos;vhmpyapi_parenttrackor&apos;);
+    util.deleteefile(v_upload_file_by_file_contents_1_id, id.vhmpyapi_parenttrackor.cf.pyapi_pt_efile);
+    
+    v_upload_file_1_id := util.gettrackorid(&apos;Upload-File-1&apos;, &apos;vhmpyapi_parenttrackor&apos;);
+    util.deleteefile(v_upload_file_1_id, id.vhmpyapi_parenttrackor.cf.pyapi_pt_efile);
+    
+    remove_assigned_wp(id.vhmpyapi_parenttrackor.tt, &apos;Assign-WP-1&apos;);
+    
+    remove_assigned_wp(id.vhmpyapi_parenttrackor.tt, &apos;Update-Task-1&apos;);
+    v_update_task_1_id := util.gettrackorid(&apos;Update-Task-1&apos;, &apos;vhmpyapi_parenttrackor&apos;);
+    v_wp_workplan_id := pkg_wp.assign_wp(id.wp_template.test_workplan, v_update_task_1_id, &apos;Update-Task-Workplan-1&apos;, current_date, null, 1, v_ret_str);
+end;</SQL_TEXT>
+  <WARNING_LABEL/>
+  <RULE_CLASS_PARAM_VALS/>
+  <RULE_HTTPCALLS/>
+  <RULE_HTTPCALL_PARAMS/>
+  <BPD_ITEMS>
+   <T_BPD_ITEM>
+    <ITEM_ID>10000617171</ITEM_ID>
+    <PKEY>100007103</PKEY>
+    <ITEM_TYPE_ID>9</ITEM_TYPE_ID>
+    <ITEM_STATUS_ID>1</ITEM_STATUS_ID>
+    <BLOB_DATA/>
+    <PROGRAM_ID>1002517</PROGRAM_ID>
+    <NAME>VHMPYAPI_DATA_PREPARATION</NAME>
+    <APP_LABEL/>
+   </T_BPD_ITEM>
+  </BPD_ITEMS>
+  <RULE_GEOCODING/>
+  <RULE_MAP_SNIPPETS/>
+  <PROGRAM_ID>1002517</PROGRAM_ID>
+  <RULE_TYPE_ID>120</RULE_TYPE_ID>
+  <RULE_TOWER_GROUPS/>
+  <COMPONENT_PACKAGES>
+   <T_BPL_COMP_PKG>
+    <COMPONENT_ID>4</COMPONENT_ID>
+    <OBJECT_ID>100007103</OBJECT_ID>
+    <COMPONENTS_PACKAGE_ID>101543</COMPONENTS_PACKAGE_ID>
+    <NAME>VHMPYAPI</NAME>
+    <PROGRAM_ID>1002517</PROGRAM_ID>
+    <BPD_ITEMS/>
+    <IS_LOCKED>0</IS_LOCKED>
+   </T_BPL_COMP_PKG>
+  </COMPONENT_PACKAGES>
+  <CONFIG_FIELD_IDNUMS/>
+  <TASK_DATE_IDNUMS/>
+  <TASK_IDNUMS/>
+  <TRACKOR_TYPE_IDNUMS/>
+  <RELATION_TYPE_IDNUMS/>
+  <WP_TEMPLATE_IDNUMS/>
+  <WF_TEMPLATE_IDNUMS/>
+  <IMPORT_IDNUMS/>
+  <REPORT_IDNUMS/>
+  <COMPONENT_LABELS/>
+ </RULES_ITEM>
+ <RULES_ITEM>
+  <IS_ASYNC>0</IS_ASYNC>
+  <IS_ENABLED>1</IS_ENABLED>
+  <RULE>VHMPYAPI_SLEEP_FOR_INTERRUPT_IMPORT</RULE>
+  <RULE_CLASS_ID>1</RULE_CLASS_ID>
+  <RULE_ID>100007105</RULE_ID>
+  <RULE_TYPE>
+   <RULE_TYPE_ID>38</RULE_TYPE_ID>
+   <RULE_TYPE>After Import Start</RULE_TYPE>
+   <ID_FIELD>:IMP_RUN_ID</ID_FIELD>
+   <TEMPLATE_SQL>select imp_spec_id as &quot;Import ID&quot;,
+       name as &quot;Import Name&quot;,
+       imp_spec_id as &quot;Import Id&quot;
+from imp_spec</TEMPLATE_SQL>
+   <TYPE_LABELS>
+    <T_LABEL>
+     <APP_LANG_ID>0</APP_LANG_ID>
+     <APP_LABEL_ID>6431</APP_LABEL_ID>
+     <LABEL_TEXT>Import Started (After)</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>1</APP_LANG_ID>
+     <APP_LABEL_ID>6431</APP_LABEL_ID>
+     <LABEL_TEXT>Import Started (After)</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>5</APP_LANG_ID>
+     <APP_LABEL_ID>6431</APP_LABEL_ID>
+     <LABEL_TEXT>Import Started (After)</LABEL_TEXT>
+    </T_LABEL>
+   </TYPE_LABELS>
+   <DESC_LABELS>
+    <T_LABEL>
+     <APP_LANG_ID>0</APP_LANG_ID>
+     <APP_LABEL_ID>6460</APP_LABEL_ID>
+     <LABEL_TEXT>Executed on import start after CSV is parsed and stored in IMP_RUN_GRID. Exception in rule will stop import execution with status &quot;Interrupted&quot;, it will be logged as import warning. Values returned with RETURN_STR param will not stop import execution, but will be logged as import warning</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>1</APP_LANG_ID>
+     <APP_LABEL_ID>6460</APP_LABEL_ID>
+     <LABEL_TEXT>Executed on import start after CSV is parsed and stored in IMP_RUN_GRID. Exception in rule will stop import execution with status &quot;Interrupted&quot;, it will be logged as import warning. Values returned with RETURN_STR param will not stop import execution, but will be logged as import warning</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>5</APP_LANG_ID>
+     <APP_LABEL_ID>6460</APP_LABEL_ID>
+     <LABEL_TEXT>Executed on import start after CSV is parsed and stored in IMP_RUN_GRID. Exception in rule will stop import execution with status &quot;Interrupted&quot;, it will be logged as import warning. Values returned with RETURN_STR param will not stop import execution, but will be logged as import warning</LABEL_TEXT>
+    </T_LABEL>
+   </DESC_LABELS>
+  </RULE_TYPE>
+  <SQL_TEXT>begin
+    dbms_lock.sleep(5);
+end;</SQL_TEXT>
+  <WARNING_LABEL/>
+  <RULE_CLASS_PARAM_VALS/>
+  <RULE_HTTPCALLS/>
+  <RULE_HTTPCALL_PARAMS/>
+  <BPD_ITEMS>
+   <T_BPD_ITEM>
+    <ITEM_ID>10000617192</ITEM_ID>
+    <PKEY>100007105</PKEY>
+    <ITEM_TYPE_ID>9</ITEM_TYPE_ID>
+    <ITEM_STATUS_ID>1</ITEM_STATUS_ID>
+    <BLOB_DATA/>
+    <PROGRAM_ID>1002517</PROGRAM_ID>
+    <NAME>VHMPYAPI_SLEEP_FOR_INTERRUPT_IMPORT</NAME>
+    <APP_LABEL/>
+   </T_BPD_ITEM>
+  </BPD_ITEMS>
+  <RULE_GEOCODING/>
+  <RULE_MAP_SNIPPETS/>
+  <PROGRAM_ID>1002517</PROGRAM_ID>
+  <RULE_TYPE_ID>38</RULE_TYPE_ID>
+  <RULE_TOWER_GROUPS/>
+  <COMPONENT_PACKAGES>
+   <T_BPL_COMP_PKG>
+    <COMPONENT_ID>4</COMPONENT_ID>
+    <OBJECT_ID>100007105</OBJECT_ID>
+    <COMPONENTS_PACKAGE_ID>101543</COMPONENTS_PACKAGE_ID>
+    <NAME>VHMPYAPI</NAME>
+    <PROGRAM_ID>1002517</PROGRAM_ID>
+    <BPD_ITEMS/>
+    <IS_LOCKED>0</IS_LOCKED>
+   </T_BPL_COMP_PKG>
+  </COMPONENT_PACKAGES>
+  <CONFIG_FIELD_IDNUMS/>
+  <TASK_DATE_IDNUMS/>
+  <TASK_IDNUMS/>
+  <TRACKOR_TYPE_IDNUMS/>
+  <RELATION_TYPE_IDNUMS/>
+  <WP_TEMPLATE_IDNUMS/>
+  <WF_TEMPLATE_IDNUMS/>
+  <IMPORT_IDNUMS>
+   <VARCHAR2>VHMPYAPI_TEST_INTERRUPT_IMPORT</VARCHAR2>
+  </IMPORT_IDNUMS>
+  <REPORT_IDNUMS/>
+  <COMPONENT_LABELS/>
+ </RULES_ITEM>
+ <RULES_ITEM>
+  <IS_ASYNC>0</IS_ASYNC>
+  <IS_ENABLED>1</IS_ENABLED>
+  <RULE>VHMPYAPI_SET_BLOB_DATA_ID_TO_NUMBER_FIELD</RULE>
+  <RULE_CLASS_ID>1</RULE_CLASS_ID>
+  <RULE_ID>100007123</RULE_ID>
+  <RULE_TYPE>
+   <RULE_TYPE_ID>8</RULE_TYPE_ID>
+   <RULE_TYPE>After Configured Field Update</RULE_TYPE>
+   <ID_FIELD>PK</ID_FIELD>
+   <TEMPLATE_SQL>select c.config_field_id as &quot;Config Field ID&quot;,
+c.config_field_name as &quot;Config Field Name&quot;,
+x.xitor_type as &quot;Xitor Type&quot;,
+lbl_pref.label_text || lbl_cf.label_text as &quot;Field Label&quot;,
+c.config_field_id as &quot;Config Field Id&quot;,
+dt.type_name as &quot;Data Type&quot;
+from config_field c
+join xitor_type x on x.xitor_type_id = c.xitor_type_id
+join config_field_data_type dt on dt.config_field_data_type_id = c.data_type
+left join vw_label lbl_cf on c.app_label_id = lbl_cf.label_id and lbl_cf.app_lang_id = :p_lang_id
+left join vw_label lbl_pref on x.prefix_label_id = lbl_pref.label_id and lbl_pref.app_lang_id = :p_lang_id
+where c.is_static = 0 or c.config_field_name in (&apos;XITOR_KEY&apos;,&apos;XITOR_CLASS_ID&apos;)</TEMPLATE_SQL>
+   <TYPE_LABELS>
+    <T_LABEL>
+     <APP_LANG_ID>0</APP_LANG_ID>
+     <APP_LABEL_ID>6417</APP_LABEL_ID>
+     <LABEL_TEXT>Field Updated (After)</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>1</APP_LANG_ID>
+     <APP_LABEL_ID>6417</APP_LABEL_ID>
+     <LABEL_TEXT>Field Updated (After)</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>5</APP_LANG_ID>
+     <APP_LABEL_ID>6417</APP_LABEL_ID>
+     <LABEL_TEXT>Field Updated (After)</LABEL_TEXT>
+    </T_LABEL>
+   </TYPE_LABELS>
+   <DESC_LABELS>
+    <T_LABEL>
+     <APP_LANG_ID>0</APP_LANG_ID>
+     <APP_LABEL_ID>6446</APP_LABEL_ID>
+     <LABEL_TEXT>Executed when a Field&apos;s value is changed.</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>1</APP_LANG_ID>
+     <APP_LABEL_ID>6446</APP_LABEL_ID>
+     <LABEL_TEXT>Executed when a Field&apos;s value is changed.</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>5</APP_LANG_ID>
+     <APP_LABEL_ID>6446</APP_LABEL_ID>
+     <LABEL_TEXT>Executed when a Field&apos;s value is changed.</LABEL_TEXT>
+    </T_LABEL>
+   </DESC_LABELS>
+  </RULE_TYPE>
+  <SQL_TEXT>declare
+    v_blob_data_id blob_data.blob_data_id%type;
+    v_trackor_id number;
+begin
+    
+    v_trackor_id := util.gettrackorid(&apos;Get-File-By-Blob-1&apos;, &apos;VHMPYAPI_ParentTrackor&apos;);
+    if v_trackor_id &lt;&gt; :pk then
+        return;
+    end if;
+
+    v_blob_data_id := util.getvalnumbyid(:pk, id.vhmpyapi_parenttrackor.cf.pyapi_pt_efile);
+    util.setvalnumbyid(:pk, id.vhmpyapi_parenttrackor.cf.pyapi_pt_number, v_blob_data_id);
+
+end;</SQL_TEXT>
+  <WARNING_LABEL/>
+  <RULE_CLASS_PARAM_VALS/>
+  <RULE_HTTPCALLS/>
+  <RULE_HTTPCALL_PARAMS/>
+  <BPD_ITEMS>
+   <T_BPD_ITEM>
+    <ITEM_ID>10000617211</ITEM_ID>
+    <PKEY>100007123</PKEY>
+    <ITEM_TYPE_ID>9</ITEM_TYPE_ID>
+    <ITEM_STATUS_ID>1</ITEM_STATUS_ID>
+    <BLOB_DATA/>
+    <PROGRAM_ID>1002517</PROGRAM_ID>
+    <NAME>VHMPYAPI_SET_BLOB_DATA_ID_TO_NUMBER_FIELD</NAME>
+    <APP_LABEL/>
+   </T_BPD_ITEM>
+  </BPD_ITEMS>
+  <RULE_GEOCODING/>
+  <RULE_MAP_SNIPPETS/>
+  <PROGRAM_ID>1002517</PROGRAM_ID>
+  <RULE_TYPE_ID>8</RULE_TYPE_ID>
+  <RULE_TOWER_GROUPS/>
+  <COMPONENT_PACKAGES>
+   <T_BPL_COMP_PKG>
+    <COMPONENT_ID>4</COMPONENT_ID>
+    <OBJECT_ID>100007123</OBJECT_ID>
+    <COMPONENTS_PACKAGE_ID>101543</COMPONENTS_PACKAGE_ID>
+    <NAME>VHMPYAPI</NAME>
+    <PROGRAM_ID>1002517</PROGRAM_ID>
+    <BPD_ITEMS/>
+    <IS_LOCKED>0</IS_LOCKED>
+   </T_BPL_COMP_PKG>
+  </COMPONENT_PACKAGES>
+  <CONFIG_FIELD_IDNUMS>
+   <T_TYPE_SPECIF_OBJ_IDNUM>
+    <XITOR_TYPE>VHMPYAPI_ParentTrackor</XITOR_TYPE>
+    <OBJECT_NAME>PYAPI_PT_EFILE</OBJECT_NAME>
+   </T_TYPE_SPECIF_OBJ_IDNUM>
+  </CONFIG_FIELD_IDNUMS>
+  <TASK_DATE_IDNUMS/>
+  <TASK_IDNUMS/>
+  <TRACKOR_TYPE_IDNUMS/>
+  <RELATION_TYPE_IDNUMS/>
+  <WP_TEMPLATE_IDNUMS/>
+  <WF_TEMPLATE_IDNUMS/>
+  <IMPORT_IDNUMS/>
+  <REPORT_IDNUMS/>
+  <COMPONENT_LABELS/>
+ </RULES_ITEM>
+ <RULES_ITEM>
+  <IS_ASYNC>0</IS_ASYNC>
+  <IS_ENABLED>1</IS_ENABLED>
+  <RULE>VHMPYAPI_CREATE_TEST_DATA</RULE>
+  <RULE_CLASS_ID>1</RULE_CLASS_ID>
+  <RULE_ID>100007231</RULE_ID>
+  <RULE_TYPE>
+   <RULE_TYPE_ID>37</RULE_TYPE_ID>
+   <RULE_TYPE>After Import Complete</RULE_TYPE>
+   <ID_FIELD>IMP_RUN_ID</ID_FIELD>
+   <TEMPLATE_SQL>select imp_spec_id as &quot;Import ID&quot;,
+       name as &quot;Import Name&quot;,
+       imp_spec_id as &quot;Import Id&quot;
+from imp_spec</TEMPLATE_SQL>
+   <TYPE_LABELS>
+    <T_LABEL>
+     <APP_LANG_ID>0</APP_LANG_ID>
+     <APP_LABEL_ID>6430</APP_LABEL_ID>
+     <LABEL_TEXT>Import Completed (After)</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>1</APP_LANG_ID>
+     <APP_LABEL_ID>6430</APP_LABEL_ID>
+     <LABEL_TEXT>Import Completed (After)</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>5</APP_LANG_ID>
+     <APP_LABEL_ID>6430</APP_LABEL_ID>
+     <LABEL_TEXT>Import Completed (After)</LABEL_TEXT>
+    </T_LABEL>
+   </TYPE_LABELS>
+   <DESC_LABELS>
+    <T_LABEL>
+     <APP_LANG_ID>0</APP_LANG_ID>
+     <APP_LABEL_ID>6459</APP_LABEL_ID>
+     <LABEL_TEXT>Executed when import completes, before IMP_RUN_* tables cleanup. Exceptions will not rollback import changes, instead it will be logged as import warning, same for values returned form rule via RETURN_STR param.</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>1</APP_LANG_ID>
+     <APP_LABEL_ID>6459</APP_LABEL_ID>
+     <LABEL_TEXT>Executed when import completes, before IMP_RUN_* tables cleanup. Exceptions will not rollback import changes, instead it will be logged as import warning, same for values returned form rule via RETURN_STR param.</LABEL_TEXT>
+    </T_LABEL>
+    <T_LABEL>
+     <APP_LANG_ID>5</APP_LANG_ID>
+     <APP_LABEL_ID>6459</APP_LABEL_ID>
+     <LABEL_TEXT>Executed when import completes, before IMP_RUN_* tables cleanup. Exceptions will not rollback import changes, instead it will be logged as import warning, same for values returned form rule via RETURN_STR param.</LABEL_TEXT>
+    </T_LABEL>
+   </DESC_LABELS>
+  </RULE_TYPE>
+  <SQL_TEXT>declare
+    v_get_wp_id_1_id xitor.xitor_id%type;
+    
+    v_wp_workplan_id wp_workplan.wp_workplan_id%type;
+    v_ret_str varchar2 (4000);
+
+begin
+    v_get_wp_id_1_id := util.gettrackorid(&apos;Get-Wp-Id-1&apos;, &apos;vhmpyapi_parenttrackor&apos;);
+    v_wp_workplan_id := pkg_wp.assign_wp(id.wp_template.test_workplan, v_get_wp_id_1_id, &apos;Get-Wp-Id-Test WorkPlan&apos;, null, null, 1, v_ret_str);
+end;</SQL_TEXT>
+  <WARNING_LABEL/>
+  <RULE_CLASS_PARAM_VALS/>
+  <RULE_HTTPCALLS/>
+  <RULE_HTTPCALL_PARAMS/>
+  <BPD_ITEMS>
+   <T_BPD_ITEM>
+    <ITEM_ID>10000617421</ITEM_ID>
+    <PKEY>100007231</PKEY>
+    <ITEM_TYPE_ID>9</ITEM_TYPE_ID>
+    <ITEM_STATUS_ID>1</ITEM_STATUS_ID>
+    <BLOB_DATA/>
+    <PROGRAM_ID>1002517</PROGRAM_ID>
+    <NAME>VHMPYAPI_CREATE_TEST_DATA</NAME>
+    <APP_LABEL/>
+   </T_BPD_ITEM>
+  </BPD_ITEMS>
+  <RULE_GEOCODING/>
+  <RULE_MAP_SNIPPETS/>
+  <PROGRAM_ID>1002517</PROGRAM_ID>
+  <RULE_TYPE_ID>37</RULE_TYPE_ID>
+  <RULE_TOWER_GROUPS/>
+  <COMPONENT_PACKAGES>
+   <T_BPL_COMP_PKG>
+    <COMPONENT_ID>4</COMPONENT_ID>
+    <OBJECT_ID>100007231</OBJECT_ID>
+    <COMPONENTS_PACKAGE_ID>101543</COMPONENTS_PACKAGE_ID>
+    <NAME>VHMPYAPI</NAME>
+    <PROGRAM_ID>1002517</PROGRAM_ID>
+    <BPD_ITEMS/>
+    <IS_LOCKED>0</IS_LOCKED>
+   </T_BPL_COMP_PKG>
+  </COMPONENT_PACKAGES>
+  <CONFIG_FIELD_IDNUMS/>
+  <TASK_DATE_IDNUMS/>
+  <TASK_IDNUMS/>
+  <TRACKOR_TYPE_IDNUMS/>
+  <RELATION_TYPE_IDNUMS/>
+  <WP_TEMPLATE_IDNUMS/>
+  <WF_TEMPLATE_IDNUMS/>
+  <IMPORT_IDNUMS>
+   <VARCHAR2>VHMPYAPI_CREATE_TEST_DATA</VARCHAR2>
+  </IMPORT_IDNUMS>
+  <REPORT_IDNUMS/>
+  <COMPONENT_LABELS/>
+ </RULES_ITEM>
+</RULES>
+</COMPONENTS>

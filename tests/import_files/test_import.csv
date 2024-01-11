@@ -1,0 +1,3 @@
+ParentId,ParentNumber,ParentText,ChildId,ChildNumber,ChildText
+"Import-Parent-Trackor-1",10,"Import-Parent-Trackor-Text-Value-1","Import-Child-Trackor-1",20,"Import-Child-Trackor-Text-Value-1"
+"Import-Parent-Trackor-2",30,"Import-Parent-Trackor-Text-Value-2","Import-Child-Trackor-2",40,"Import-Child-Trackor-Text-Value-2"
