@@ -1,0 +1,39 @@
+name: onevizion library test
+
+# Required secrets:
+# OV_INTEGRATIONS_ACCESS_KEY - Access Key to access integrations.onevizion.com
+# OV_INTEGRATIONS_SECRET_KEY - Secret Key to access integrations.onevizion.com
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+env:
+  TRACKOR_URL: https://integrations.onevizion.com
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r tests/python_dependencies.ini
+    - name: Test with unittest
+      run: |
+        python tests/start_module.py -u ${{ env.TRACKOR_URL }} -a ${{ secrets.OV_INTEGRATIONS_ACCESS_KEY }} -s ${{ secrets.OV_INTEGRATIONS_SECRET_KEY }}
